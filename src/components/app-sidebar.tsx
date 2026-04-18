@@ -52,7 +52,7 @@ export function AppSidebar() {
   return (
     <Sidebar className="border-r border-border/50">
       <SidebarHeader className="px-4 py-5">
-        <Link href="/dashboard" className="flex items-center gap-2.5 group">
+        <Link href="/dashboard" className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center shrink-0">
             <Zap className="w-4 h-4 text-primary-foreground" />
           </div>
@@ -72,20 +72,23 @@ export function AppSidebar() {
                 const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href))
                 return (
                   <SidebarMenuItem key={href}>
-                    <SidebarMenuButton asChild isActive={active}>
-                      <Link
-                        href={href}
-                        className={cn(
-                          "flex items-center gap-2.5 text-sm font-medium rounded-md px-2.5 py-2 transition-colors",
-                          active
-                            ? "text-foreground bg-sidebar-accent"
-                            : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50"
-                        )}
-                      >
-                        <Icon className="w-4 h-4 shrink-0" />
-                        {label}
-                      </Link>
-                    </SidebarMenuButton>
+                    <SidebarMenuButton
+                      isActive={active}
+                      render={
+                        <Link
+                          href={href}
+                          className={cn(
+                            "flex items-center gap-2.5 text-sm font-medium rounded-md px-2.5 py-2 transition-colors w-full",
+                            active
+                              ? "text-foreground bg-sidebar-accent"
+                              : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50"
+                          )}
+                        >
+                          <Icon className="w-4 h-4 shrink-0" />
+                          {label}
+                        </Link>
+                      }
+                    />
                   </SidebarMenuItem>
                 )
               })}
@@ -105,20 +108,23 @@ export function AppSidebar() {
                 const active = pathname === href
                 return (
                   <SidebarMenuItem key={href}>
-                    <SidebarMenuButton asChild isActive={active}>
-                      <Link
-                        href={href}
-                        className={cn(
-                          "flex items-center gap-2.5 text-sm font-medium rounded-md px-2.5 py-2 transition-colors",
-                          active
-                            ? "text-foreground bg-sidebar-accent"
-                            : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50"
-                        )}
-                      >
-                        <Icon className="w-4 h-4 shrink-0" />
-                        {label}
-                      </Link>
-                    </SidebarMenuButton>
+                    <SidebarMenuButton
+                      isActive={active}
+                      render={
+                        <Link
+                          href={href}
+                          className={cn(
+                            "flex items-center gap-2.5 text-sm font-medium rounded-md px-2.5 py-2 transition-colors w-full",
+                            active
+                              ? "text-foreground bg-sidebar-accent"
+                              : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50"
+                          )}
+                        >
+                          <Icon className="w-4 h-4 shrink-0" />
+                          {label}
+                        </Link>
+                      }
+                    />
                   </SidebarMenuItem>
                 )
               })}
@@ -129,20 +135,20 @@ export function AppSidebar() {
 
       <SidebarFooter className="px-3 py-3 border-t border-border/40">
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2.5 w-full px-2 py-2 rounded-md hover:bg-sidebar-accent/50 transition-colors group">
-              <Avatar className="w-7 h-7 shrink-0">
-                <AvatarImage src="" />
-                <AvatarFallback className="text-xs bg-primary/20 text-primary font-semibold">
-                  JD
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0 text-left">
-                <p className="text-xs font-medium text-foreground truncate">John Doe</p>
-                <p className="text-xs text-muted-foreground truncate">john@example.com</p>
-              </div>
-              <ChevronDown className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
-            </button>
+          <DropdownMenuTrigger
+            className="flex items-center gap-2.5 w-full px-2 py-2 rounded-md hover:bg-sidebar-accent/50 transition-colors group"
+          >
+            <Avatar className="w-7 h-7 shrink-0">
+              <AvatarImage src="" />
+              <AvatarFallback className="text-xs bg-primary/20 text-primary font-semibold">
+                JD
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0 text-left">
+              <p className="text-xs font-medium text-foreground truncate">John Doe</p>
+              <p className="text-xs text-muted-foreground truncate">john@example.com</p>
+            </div>
+            <ChevronDown className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" side="top" className="w-48">
             <DropdownMenuItem>Profile</DropdownMenuItem>
