@@ -1,60 +1,41 @@
 "use client"
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react"
-import { apiClient } from "@/lib/api-client"
+import { createContext, useCallback, useContext, useEffect, useState } from "react"
 
-export interface User {
-  id: string
-  email: string
-  name: string
-  avatar_url?: string
-}
+const STORAGE_KEY = "traza_api_key"
 
 interface AuthState {
-  user: User | null
-  isLoading: boolean
+  apiKey: string | null
   isAuthenticated: boolean
-  login: (email: string, password: string) => Promise<void>
-  logout: () => Promise<void>
+  isLoading: boolean
+  login: (apiKey: string) => void
+  logout: () => void
 }
 
 const AuthContext = createContext<AuthState | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+  const [apiKey, setApiKey] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    apiClient
-      .get<User>("/api/v1/auth/me")
-      .then(setUser)
-      .catch(() => setUser(null))
-      .finally(() => setIsLoading(false))
+    const stored = localStorage.getItem(STORAGE_KEY)
+    setApiKey(stored)
+    setIsLoading(false)
   }, [])
 
-  const login = useCallback(async (email: string, password: string) => {
-    const { user: authUser } = await apiClient.post<{ user: User }>(
-      "/api/v1/auth/login",
-      { email, password }
-    )
-    setUser(authUser)
+  const login = useCallback((key: string) => {
+    localStorage.setItem(STORAGE_KEY, key)
+    setApiKey(key)
   }, [])
 
-  const logout = useCallback(async () => {
-    await apiClient.post("/api/v1/auth/logout")
-    setUser(null)
+  const logout = useCallback(() => {
+    localStorage.removeItem(STORAGE_KEY)
+    setApiKey(null)
   }, [])
 
   return (
-    <AuthContext.Provider
-      value={{ user, isLoading, isAuthenticated: !!user, login, logout }}
-    >
+    <AuthContext.Provider value={{ apiKey, isAuthenticated: !!apiKey, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   )
@@ -64,4 +45,9 @@ export function useAuth() {
   const ctx = useContext(AuthContext)
   if (!ctx) throw new Error("useAuth must be used within AuthProvider")
   return ctx
+}
+
+export function getStoredApiKey(): string | null {
+  if (typeof window === "undefined") return null
+  return localStorage.getItem(STORAGE_KEY)
 }
