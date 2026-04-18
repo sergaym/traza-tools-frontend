@@ -1,11 +1,12 @@
 "use client"
 
+import type React from "react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 
 interface TopBarProps {
-  title: string
+  title: React.ReactNode
   description?: string
   badge?: string
   actions?: React.ReactNode

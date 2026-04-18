@@ -1,13 +1,14 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { TopBar } from "@/components/top-bar"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Search, Plus, CheckCircle2, Globe, Loader2 } from "lucide-react"
+import { Search, Plus, CheckCircle2, Globe, Loader2, ChevronRight } from "lucide-react"
 
 interface Integration {
   id: string
@@ -167,53 +168,70 @@ function IntegrationCard({
   connecting: boolean
   onConnect: () => void
 }) {
+  const cardContent = (
+    <CardContent className="p-4 flex items-start gap-3">
+      <div
+        className={`w-9 h-9 rounded-lg shrink-0 flex items-center justify-center text-xs font-bold ${
+          LOGO_COLORS[integration.logo] ?? "bg-muted text-foreground"
+        }`}
+      >
+        {integration.logo}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5 mb-0.5">
+          <p className="text-sm font-medium text-foreground truncate">{integration.name}</p>
+          {integration.connected && (
+            <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
+          )}
+        </div>
+        <p className="text-xs text-muted-foreground leading-snug line-clamp-2">
+          {integration.description}
+        </p>
+        <div className="mt-3 flex items-center justify-between">
+          {integration.connected ? (
+            <Badge
+              variant="secondary"
+              className="text-xs font-normal text-emerald-400 bg-emerald-400/10 border-0"
+            >
+              Connected
+            </Badge>
+          ) : (
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-6 text-xs px-2.5 border-border/60 hover:border-primary/60 hover:text-primary gap-1"
+              onClick={(e) => { e.preventDefault(); onConnect() }}
+              disabled={connecting}
+            >
+              {connecting ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Plus className="w-3 h-3" />
+              )}
+              Connect
+            </Button>
+          )}
+          {integration.connected && (
+            <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
+          )}
+        </div>
+      </div>
+    </CardContent>
+  )
+
+  if (integration.connected) {
+    return (
+      <Link href={`/dashboard/integrations/${integration.id}`}>
+        <Card className="bg-card border-border hover:border-primary/30 transition-all group cursor-pointer">
+          {cardContent}
+        </Card>
+      </Link>
+    )
+  }
+
   return (
-    <Card className="bg-card border-border hover:border-primary/30 transition-all group">
-      <CardContent className="p-4 flex items-start gap-3">
-        <div
-          className={`w-9 h-9 rounded-lg shrink-0 flex items-center justify-center text-xs font-bold ${
-            LOGO_COLORS[integration.logo] ?? "bg-muted text-foreground"
-          }`}
-        >
-          {integration.logo}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 mb-0.5">
-            <p className="text-sm font-medium text-foreground truncate">{integration.name}</p>
-            {integration.connected && (
-              <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
-            )}
-          </div>
-          <p className="text-xs text-muted-foreground leading-snug line-clamp-2">
-            {integration.description}
-          </p>
-          <div className="mt-3">
-            {integration.connected ? (
-              <Badge
-                variant="secondary"
-                className="text-xs font-normal text-emerald-400 bg-emerald-400/10 border-0"
-              >
-                Connected
-              </Badge>
-            ) : (
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-6 text-xs px-2.5 border-border/60 hover:border-primary/60 hover:text-primary gap-1"
-                onClick={onConnect}
-                disabled={connecting}
-              >
-                {connecting ? (
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                ) : (
-                  <Plus className="w-3 h-3" />
-                )}
-                Connect
-              </Button>
-            )}
-          </div>
-        </div>
-      </CardContent>
+    <Card className="bg-card border-border hover:border-border/80 transition-all group">
+      {cardContent}
     </Card>
   )
 }

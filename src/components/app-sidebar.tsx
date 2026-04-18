@@ -133,6 +133,7 @@ export function AppSidebar() {
       <SidebarFooter className="px-3 py-3 border-t border-border/40">
         <DropdownMenu>
           <DropdownMenuTrigger
+            nativeButton={false}
             render={
               <div className="flex items-center gap-2.5 w-full px-2 py-2 rounded-md hover:bg-sidebar-accent/50 transition-colors cursor-pointer group">
                 <Avatar className="w-7 h-7 shrink-0">
