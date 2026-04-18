@@ -1,25 +1,43 @@
-export type ToolCategory = "read" | "write" | "action"
-
-export interface Tool {
-  id: string
-  name: string
-  description: string
-  integration_id: string
-  integration_name: string
-  category: ToolCategory
-  enabled: boolean
-  calls_total: number
-  schema?: Record<string, unknown>
-}
-
-export interface ToolExecutePayload {
+export interface ToolSummary {
+  tool_slug: string
+  provider_id: string
   tool_id: string
-  params: Record<string, unknown>
+  name: string
+  version: string
 }
 
-export interface ToolExecuteResult {
-  success: boolean
-  data?: unknown
-  error?: string
-  latency_ms: number
+export interface ToolDetail {
+  tool_slug: string
+  provider_id: string
+  tool_id: string
+  name: string
+  description: string | null
+  version: string
+  parameters: Record<string, unknown>
+  response: Record<string, unknown>
+}
+
+export interface ExecutionLog {
+  id: string
+  provider_id: string
+  tool_id: string
+  connection_id: string | null
+  status: string
+  duration_ms: number | null
+  error: string | null
+  created_at: string | null
+}
+
+export interface ExecutionLogDetail extends ExecutionLog {
+  user_id: string
+  arguments: Record<string, unknown>
+  result: Record<string, unknown> | null
+}
+
+export interface ExecuteToolRequest {
+  user_id: string
+  session_id?: string | null
+  connected_account_id?: string | null
+  version?: string | null
+  arguments?: Record<string, unknown>
 }

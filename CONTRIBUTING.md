@@ -9,6 +9,7 @@ Welcome! This guide will help you understand our development practices and codin
 - [General Principles](#general-principles)
 - [Project Structure](#project-structure)
 - [Module Architecture](#module-architecture)
+- [API Alignment](#api-alignment)
 - [API Services](#api-services)
 - [Data Fetching](#data-fetching)
 - [Error Handling](#error-handling)
@@ -90,30 +91,49 @@ traza-frontend/
 │   ├── ui/                       # Shadcn UI components
 │   └── dashboard-layout.tsx
 ├── modules/                      # 🎯 Work here most of the time
-│   ├── incidents/
+│   ├── users/
+│   │   ├── services/
+│   │   │   └── users-service.ts
+│   │   └── types/
+│   │       └── index.ts
+│   ├── sessions/
+│   │   ├── services/
+│   │   │   └── sessions-service.ts
+│   │   └── types/
+│   │       └── index.ts
+│   ├── providers/
+│   │   ├── services/
+│   │   │   └── providers-service.ts
+│   │   └── types/
+│   │       └── index.ts
+│   ├── tools/
 │   │   ├── components/
 │   │   ├── hooks/
 │   │   ├── services/
-│   │   │   └── incidents-service.ts
+│   │   │   └── tools-service.ts
 │   │   └── types/
 │   │       └── index.ts
-│   ├── interactions/
+│   ├── connections/
+│   │   ├── components/
+│   │   ├── hooks/
 │   │   ├── services/
-│   │   │   └── interactions-service.ts
+│   │   │   └── connections-service.ts
 │   │   └── types/
 │   │       └── index.ts
-│   ├── integrations/
-│   │   ├── constants/
-│   │   ├── types/
-│   │   └── utils/
-│   ├── rag/
+│   ├── connect-links/
 │   │   ├── services/
+│   │   │   └── connect-links-service.ts
 │   │   └── types/
-│   └── i18n/
+│   │       └── index.ts
+│   └── triggers/
+│       ├── services/
+│       │   └── triggers-service.ts
+│       └── types/
+│           └── index.ts
 ├── lib/                          # Shared infrastructure
 │   ├── api-client.ts             # HTTP client
 │   ├── auth-context.tsx          # Auth provider
-│   ├── types.ts                  # Shared types only
+│   ├── types.ts                  # Shared types (CursorPaginated, etc.)
 │   └── utils.ts                  # Shared utilities
 ├── hooks/                        # Global hooks (DEPRECATED)
 └── public/                       # Static assets
@@ -195,6 +215,408 @@ import { useIncidents } from '@/modules/incidents/hooks/use-incidents'
 
 // ❌ Bad
 import { Incident } from '../../../modules/incidents/types'
+```
+
+---
+
+## API Alignment
+
+The backend (`traza-tools`) exposes a versioned REST API at `/v1/`. Every frontend module maps 1:1 to a backend module. This section documents the contract.
+
+### Shared types
+
+```typescript
+// lib/types.ts
+
+export interface CursorPaginated<T> {
+  data: T[]
+  has_more: boolean
+  next_cursor: string | null
+}
+```
+
+### Module map
+
+| Frontend module | API prefix | Backend module |
+|---|---|---|
+| `modules/users` | `/v1/users` | `api/modules/users` |
+| `modules/sessions` | `/v1/sessions` | `api/modules/sessions` |
+| `modules/providers` | `/v1/providers` | `api/modules/providers` |
+| `modules/tools` | `/v1/tools` | `api/modules/tools` |
+| `modules/connections` | `/v1/connections` | `api/modules/connections` |
+| `modules/connect-links` | `/v1/connect-links` | `api/modules/connect_links` |
+| `modules/triggers` | `/v1/triggers` | `api/modules/triggers` |
+
+### `modules/users`
+
+**Types** (`modules/users/types/index.ts`):
+```typescript
+export interface User {
+  id: string
+  external_id: string
+  metadata: Record<string, unknown>
+}
+
+export interface CreateUserRequest {
+  external_id: string
+  metadata?: Record<string, unknown>
+}
+```
+
+**Service** (`modules/users/services/users-service.ts`):
+```typescript
+class UsersService {
+  private readonly basePath = '/v1/users'
+
+  async create(data: CreateUserRequest): Promise<User> {
+    return apiClient.post<User>(`${this.basePath}/`, data)
+  }
+
+  async getById(userId: string): Promise<User> {
+    return apiClient.get<User>(`${this.basePath}/${userId}`)
+  }
+}
+```
+
+### `modules/sessions`
+
+**Types** (`modules/sessions/types/index.ts`):
+```typescript
+export interface Session {
+  id: string
+  user_id: string
+  toolkit_ids: string[] | null
+  connected_accounts: Record<string, string>
+  created_at: string
+}
+
+export interface CreateSessionRequest {
+  user_id: string
+  toolkit_ids?: string[] | null
+  connected_accounts?: Record<string, string>
+}
+
+export interface ToolSearchResult {
+  tool_slug: string
+  tool_name: string
+  description: string
+  tags: string[]
+}
+
+export interface ToolSchemaResponse {
+  tool_slug: string
+  provider_id: string
+  tool_id: string
+  name: string
+  description: string | null
+  version: string
+  parameters: Record<string, unknown>
+  response: Record<string, unknown>
+}
+
+export interface ExecuteToolRequest {
+  tool_slug: string
+  arguments?: Record<string, unknown>
+}
+
+export interface ExecuteToolResult {
+  [key: string]: unknown
+}
+```
+
+**Service** (`modules/sessions/services/sessions-service.ts`):
+```typescript
+class SessionsService {
+  private readonly basePath = '/v1/sessions'
+
+  async create(data: CreateSessionRequest): Promise<Session> {
+    return apiClient.post<Session>(`${this.basePath}/`, data)
+  }
+
+  async getById(sessionId: string): Promise<Session> {
+    return apiClient.get<Session>(`${this.basePath}/${sessionId}`)
+  }
+
+  async getTools(sessionId: string): Promise<unknown> {
+    return apiClient.get(`${this.basePath}/${sessionId}/tools`)
+  }
+
+  async searchTools(sessionId: string, query: string, tags?: string[], limit = 20): Promise<ToolSearchResult[]> {
+    return apiClient.post<ToolSearchResult[]>(`${this.basePath}/${sessionId}/search_tools`, { query, tags, limit })
+  }
+
+  async getToolSchema(sessionId: string, toolSlug: string): Promise<ToolSchemaResponse> {
+    return apiClient.post<ToolSchemaResponse>(`${this.basePath}/${sessionId}/get_tool_schema`, { tool_slug: toolSlug })
+  }
+
+  async executeTool(sessionId: string, data: ExecuteToolRequest): Promise<ExecuteToolResult> {
+    return apiClient.post<ExecuteToolResult>(`${this.basePath}/${sessionId}/execute_tool`, data)
+  }
+}
+```
+
+### `modules/providers`
+
+**Types** (`modules/providers/types/index.ts`):
+```typescript
+export interface ProviderSummary {
+  id: string
+  name: string
+}
+
+export interface ProviderToolItem {
+  tool_slug: string
+  tool_id: string
+  name: string
+  description: string | null
+}
+
+export interface ProviderConnectionItem {
+  connection_id: string
+  name: string
+  description: string | null
+}
+
+export interface ProviderDetail {
+  id: string
+  name: string
+  tool_count: number
+  trigger_count: number
+}
+```
+
+**Service** (`modules/providers/services/providers-service.ts`):
+```typescript
+class ProvidersService {
+  private readonly basePath = '/v1/providers'
+
+  async getAll(params?: { limit?: number; starting_after?: string }): Promise<CursorPaginated<ProviderSummary>> {
+    return apiClient.get<CursorPaginated<ProviderSummary>>(`${this.basePath}/`, params)
+  }
+
+  async getById(providerId: string): Promise<ProviderDetail> {
+    return apiClient.get<ProviderDetail>(`${this.basePath}/${providerId}`)
+  }
+}
+```
+
+### `modules/tools`
+
+**Types** (`modules/tools/types/index.ts`):
+```typescript
+export interface ToolSummary {
+  tool_slug: string
+  provider_id: string
+  tool_id: string
+  name: string
+  version: string
+}
+
+export interface ToolDetail {
+  tool_slug: string
+  provider_id: string
+  tool_id: string
+  name: string
+  description: string | null
+  version: string
+  parameters: Record<string, unknown>
+  response: Record<string, unknown>
+}
+
+export interface ExecutionLog {
+  id: string
+  provider_id: string
+  tool_id: string
+  connection_id: string | null
+  status: string
+  duration_ms: number | null
+  error: string | null
+  created_at: string | null
+}
+
+export interface ExecutionLogDetail extends ExecutionLog {
+  user_id: string
+  arguments: Record<string, unknown>
+  result: Record<string, unknown> | null
+}
+
+export interface ExecuteToolRequest {
+  user_id: string
+  session_id?: string | null
+  connected_account_id?: string | null
+  version?: string | null
+  arguments?: Record<string, unknown>
+}
+```
+
+**Service** (`modules/tools/services/tools-service.ts`):
+```typescript
+class ToolsService {
+  private readonly basePath = '/v1/tools'
+
+  async getAll(params?: { limit?: number; starting_after?: string }): Promise<CursorPaginated<ToolSummary>> {
+    return apiClient.get<CursorPaginated<ToolSummary>>(`${this.basePath}/`, params)
+  }
+
+  async getBySlug(toolSlug: string): Promise<ToolDetail> {
+    return apiClient.get<ToolDetail>(`${this.basePath}/${toolSlug}`)
+  }
+
+  async execute(toolSlug: string, data: ExecuteToolRequest): Promise<unknown> {
+    return apiClient.post(`${this.basePath}/execute/${toolSlug}`, data)
+  }
+
+  async getLogs(): Promise<ExecutionLog[]> {
+    return apiClient.get<ExecutionLog[]>(`${this.basePath}/logs`)
+  }
+
+  async getLogById(logId: string): Promise<ExecutionLogDetail> {
+    return apiClient.get<ExecutionLogDetail>(`${this.basePath}/logs/${logId}`)
+  }
+}
+```
+
+### `modules/connections`
+
+**Types** (`modules/connections/types/index.ts`):
+```typescript
+export interface Connection {
+  id: string
+  provider_id: string
+  connection_id: string
+  status: string
+  created_at: string | null
+  updated_at: string | null
+}
+
+export interface CreateConnectionRequest {
+  user_id: string
+  provider_id: string
+  connection_id: string
+  credentials: Record<string, unknown>
+}
+
+export interface CreateConnectionResponse {
+  id: string
+  status: string
+}
+
+export interface InitiateOAuthRequest {
+  user_id: string
+  provider_id: string
+  connection_id: string
+  redirect_url?: string | null
+}
+
+export interface OAuthInitiateResponse {
+  authorization_url: string
+  state: string
+}
+```
+
+**Service** (`modules/connections/services/connections-service.ts`):
+```typescript
+class ConnectionsService {
+  private readonly basePath = '/v1/connections'
+
+  async create(data: CreateConnectionRequest): Promise<CreateConnectionResponse> {
+    return apiClient.post<CreateConnectionResponse>(`${this.basePath}/`, data)
+  }
+
+  async getAll(): Promise<Connection[]> {
+    return apiClient.get<Connection[]>(`${this.basePath}/`)
+  }
+
+  async getById(connectedAccountId: string): Promise<Connection> {
+    return apiClient.get<Connection>(`${this.basePath}/${connectedAccountId}`)
+  }
+
+  async delete(connectedAccountId: string): Promise<void> {
+    return apiClient.delete(`${this.basePath}/${connectedAccountId}`)
+  }
+
+  async initiateOAuth(data: InitiateOAuthRequest): Promise<OAuthInitiateResponse> {
+    return apiClient.post<OAuthInitiateResponse>(`${this.basePath}/initiate`, data)
+  }
+}
+```
+
+### `modules/connect-links`
+
+**Types** (`modules/connect-links/types/index.ts`):
+```typescript
+export interface CreateConnectLinkRequest {
+  user_id: string
+  provider_id: string
+  connection_id: string
+  redirect_url?: string | null
+}
+
+export interface ConnectLink {
+  id: string
+  url: string
+  expires_at: string
+}
+```
+
+**Service** (`modules/connect-links/services/connect-links-service.ts`):
+```typescript
+class ConnectLinksService {
+  private readonly basePath = '/v1/connect-links'
+
+  async create(data: CreateConnectLinkRequest): Promise<ConnectLink> {
+    return apiClient.post<ConnectLink>(`${this.basePath}/`, data)
+  }
+}
+```
+
+### `modules/triggers`
+
+**Types** (`modules/triggers/types/index.ts`):
+```typescript
+export interface TriggerSubscription {
+  id: string
+  user_id: string
+  provider_id: string
+  trigger_id: string
+  connection_id: string
+  status: string
+  callback_url: string
+  config: Record<string, unknown>
+  created_at: string | null
+}
+
+export interface SubscribeRequest {
+  user_id: string
+  provider_id: string
+  trigger_id: string
+  connection_id: string
+  config?: Record<string, unknown>
+  callback_url: string
+}
+```
+
+**Service** (`modules/triggers/services/triggers-service.ts`):
+```typescript
+class TriggersService {
+  private readonly basePath = '/v1/triggers'
+
+  async subscribe(data: SubscribeRequest): Promise<TriggerSubscription> {
+    return apiClient.post<TriggerSubscription>(`${this.basePath}/subscribe`, data)
+  }
+
+  async getAll(): Promise<TriggerSubscription[]> {
+    return apiClient.get<TriggerSubscription[]>(`${this.basePath}/`)
+  }
+
+  async getById(subscriptionId: string): Promise<TriggerSubscription> {
+    return apiClient.get<TriggerSubscription>(`${this.basePath}/${subscriptionId}`)
+  }
+
+  async unsubscribe(subscriptionId: string): Promise<void> {
+    return apiClient.delete(`${this.basePath}/${subscriptionId}`)
+  }
+}
 ```
 
 ---

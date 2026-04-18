@@ -4,11 +4,10 @@ export interface ApiError {
   code?: string
 }
 
-export interface PaginatedResponse<T> {
+export interface CursorPaginated<T> {
   data: T[]
-  total: number
-  page: number
-  page_size: number
+  has_more: boolean
+  next_cursor: string | null
 }
 
 export interface SelectOption {
