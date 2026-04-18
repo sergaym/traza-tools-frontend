@@ -1,0 +1,57 @@
+---
+description: UI design system and visual guidelines for traza-tools-frontend
+globs: **/*.tsx
+alwaysApply: false
+---
+
+# UI Design System — Linear-Inspired
+
+## Principles
+- **Light by default.** Clean white/off-white surfaces, no dark chrome.
+- **Monochromatic base** with a single indigo accent (`primary`). Avoid mixing multiple accent colors in UI chrome.
+- **Density over padding.** Compact elements: `h-7`/`h-8` inputs, `text-xs`/`text-sm` labels, tight gap spacing.
+- **Borders, not shadows.** Use `border-border` or `border-border/50` for separation. Avoid `shadow-*` on cards.
+- **Typography hierarchy** via weight + color, not size: `font-medium text-foreground` for labels, `text-muted-foreground` for secondary.
+
+## Spacing & Sizing
+- Page padding: `p-6`
+- Section gaps: `space-y-5` or `space-y-6`
+- Card content: `px-4 py-3` or `px-5 py-4`
+- Inputs/buttons: `h-8` default, `h-7` for compact, `text-xs` or `text-sm`
+- Icon size: `w-4 h-4` standard, `w-3.5 h-3.5` in compact contexts
+
+## Components
+```tsx
+// Cards — no shadow, subtle border
+<Card className="bg-card border-border/50 hover:border-border transition-colors">
+
+// Badges — use color semantics
+<Badge className="text-emerald-600 bg-emerald-50 border-0">   // success
+<Badge className="text-amber-600 bg-amber-50 border-0">       // warning
+<Badge variant="secondary" className="font-normal">           // neutral
+
+// Inputs — tinted muted background
+<Input className="h-8 text-sm bg-muted/40 border-border/60 focus:border-primary/60" />
+
+// Buttons
+<Button size="sm" className="h-8 text-xs gap-1.5">  // primary action
+<Button variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground">  // secondary
+<Button variant="outline" size="sm" className="h-7 text-xs border-border/60">    // tertiary
+```
+
+## Top bar
+Always `sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border/40 h-14`.
+
+## Sidebar
+Slightly off-white (`var(--sidebar)`), `border-r border-border/50`. Active nav items: `bg-sidebar-accent text-foreground`. Inactive: `text-muted-foreground hover:text-foreground`.
+
+## Theme switching
+- `next-themes` with `attribute="class"`, `defaultTheme="light"` — supports `light`, `dark`, `system`
+- `ThemeSwitcher` component at `@/components/theme-switcher` — drop it where needed
+- Never hardcode `dark:` variants that conflict with the CSS variable system; the `.dark` class on `<html>` drives everything
+
+## What to avoid
+- `shadow-md`, `shadow-lg` on cards or panels
+- Colored backgrounds on hero sections or banners
+- `text-lg` or larger for UI labels
+- Rounded `rounded-xl` or `rounded-2xl` on small elements — use `rounded-md`

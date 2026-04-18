@@ -1,0 +1,49 @@
+---
+description: Core architecture and coding standards for traza-tools-frontend
+alwaysApply: true
+---
+
+# Traza Tools Frontend — Core Standards
+
+## Stack
+- Next.js 16 App Router, TypeScript strict, Tailwind CSS v4, shadcn/ui (base-ui primitives)
+- SWR for data fetching, `@/lib/api-client` for all HTTP
+
+## Architecture
+- Module-first: `src/modules/[domain]/{components,hooks,services,types}`
+- Global: `src/components/ui/` (shadcn), `src/lib/` (api-client, auth-context, types, utils)
+- Routes: `src/app/(dashboard)/dashboard/[section]/page.tsx`
+
+## Rules
+
+**Services** — all API calls through class-based services, never `fetch` in components:
+```ts
+class FooService {
+  private readonly basePath = '/api/v1/foos'
+  async getAll() { return apiClient.get<Foo[]>(`${this.basePath}/`) }
+}
+export const fooService = new FooService()
+```
+
+**Components** — always use `@/components/ui/` (shadcn) over native HTML elements.
+
+**Imports** — always absolute (`@/modules/...`), never relative (`../../`).
+
+**Constants** — no magic numbers; name them.
+
+**Early returns** — prefer guard clauses over nested ifs.
+
+**No copy-paste** — extract to hook, util, or component.
+
+## shadcn/ui (base-ui) API — IMPORTANT
+This project uses shadcn v4 with base-ui primitives. Key differences from Radix-based shadcn:
+
+- **No `asChild` prop** — use `render` prop instead:
+  ```tsx
+  // ❌ <DropdownMenuTrigger asChild><button>...</button></DropdownMenuTrigger>
+  // ✅
+  <DropdownMenuTrigger render={<div>...</div>} />
+  ```
+- **`SidebarMenuButton`** uses `render` prop, not `asChild`
+- **`TooltipProvider`** uses `delay` prop, not `delayDuration`
+- Never nest `<button>` inside `<button>` — use `<div>` as trigger render target

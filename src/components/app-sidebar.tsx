@@ -3,13 +3,12 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
-  LayoutGrid,
   Puzzle,
-  Zap,
-  GitBranch,
+  ScrollText,
   Settings,
   HelpCircle,
   ChevronDown,
+  Zap,
 } from "lucide-react"
 import {
   Sidebar,
@@ -35,10 +34,8 @@ import {
 import { cn } from "@/lib/utils"
 
 const mainNav = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutGrid },
   { label: "Integrations", href: "/dashboard/integrations", icon: Puzzle },
-  { label: "Tools", href: "/dashboard/tools", icon: Zap },
-  { label: "Triggers", href: "/dashboard/triggers", icon: GitBranch },
+  { label: "Logs", href: "/dashboard/logs", icon: ScrollText },
 ]
 
 const secondaryNav = [
@@ -69,7 +66,7 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {mainNav.map(({ label, href, icon: Icon }) => {
-                const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href))
+                const active = pathname.startsWith(href)
                 return (
                   <SidebarMenuItem key={href}>
                     <SidebarMenuButton
@@ -136,20 +133,22 @@ export function AppSidebar() {
       <SidebarFooter className="px-3 py-3 border-t border-border/40">
         <DropdownMenu>
           <DropdownMenuTrigger
-            className="flex items-center gap-2.5 w-full px-2 py-2 rounded-md hover:bg-sidebar-accent/50 transition-colors group"
-          >
-            <Avatar className="w-7 h-7 shrink-0">
-              <AvatarImage src="" />
-              <AvatarFallback className="text-xs bg-primary/20 text-primary font-semibold">
-                JD
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0 text-left">
-              <p className="text-xs font-medium text-foreground truncate">John Doe</p>
-              <p className="text-xs text-muted-foreground truncate">john@example.com</p>
-            </div>
-            <ChevronDown className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
-          </DropdownMenuTrigger>
+            render={
+              <div className="flex items-center gap-2.5 w-full px-2 py-2 rounded-md hover:bg-sidebar-accent/50 transition-colors cursor-pointer group">
+                <Avatar className="w-7 h-7 shrink-0">
+                  <AvatarImage src="" />
+                  <AvatarFallback className="text-xs bg-primary/20 text-primary font-semibold">
+                    JD
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-xs font-medium text-foreground truncate">John Doe</p>
+                  <p className="text-xs text-muted-foreground truncate">john@example.com</p>
+                </div>
+                <ChevronDown className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
+              </div>
+            }
+          />
           <DropdownMenuContent align="end" side="top" className="w-48">
             <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem>API Keys</DropdownMenuItem>

@@ -168,7 +168,7 @@ function IntegrationCard({
   onConnect: () => void
 }) {
   return (
-    <Card className="bg-card border-border/50 hover:border-border transition-all group">
+    <Card className="bg-card border-border hover:border-primary/30 transition-all group">
       <CardContent className="p-4 flex items-start gap-3">
         <div
           className={`w-9 h-9 rounded-lg shrink-0 flex items-center justify-center text-xs font-bold ${
