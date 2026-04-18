@@ -45,6 +45,6 @@ This project uses shadcn v4 with base-ui primitives. Key differences from Radix-
   <DropdownMenuTrigger render={<div>...</div>} />
   ```
 - **`SidebarMenuButton`** uses `render` prop, not `asChild`
-- **`Button`** also uses `render` prop — use `<Button render={<Link href="..." />}>label</Button>` for link buttons
+- **`Button`** also uses `render` prop — use `<Button render={<Link href="..." />} nativeButton={false}>label</Button>` for link buttons (`nativeButton={false}` is required when the render target is not a `<button>`)
 - **`TooltipProvider`** uses `delay` prop, not `delayDuration`
 - Never nest `<button>` inside `<button>` — use `<div>` as trigger render target
