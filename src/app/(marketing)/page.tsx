@@ -101,11 +101,11 @@ export default function LandingPage() {
         </p>
 
         <div className="flex items-center justify-center gap-3">
-          <Button size="sm" className="h-9 px-5 text-sm gap-1.5" render={<Link href="/dashboard" />}>
+          <Button size="sm" className="h-9 px-5 text-sm gap-1.5" render={<Link href="/dashboard" />} nativeButton={false}>
               Start building
               <ArrowRight className="w-3.5 h-3.5" />
             </Button>
-            <Button variant="outline" size="sm" className="h-9 px-5 text-sm border-border" render={<Link href="/docs" />}>
+            <Button variant="outline" size="sm" className="h-9 px-5 text-sm border-border" render={<Link href="/docs" />} nativeButton={false}>
               Read the docs
             </Button>
         </div>
@@ -336,6 +336,7 @@ export default function LandingPage() {
                 className="h-8 text-xs w-full"
                 variant={primary ? "default" : "outline"}
                 render={<Link href="/dashboard" />}
+                nativeButton={false}
               >
                 {cta}
                 <ChevronRight className="w-3.5 h-3.5 ml-auto" />
@@ -354,7 +355,7 @@ export default function LandingPage() {
           <p className="text-sm text-muted-foreground mb-8 max-w-md mx-auto">
             Connect your first integration in under 5 minutes. No credit card required.
           </p>
-          <Button size="sm" className="h-9 px-6 text-sm gap-1.5" render={<Link href="/dashboard" />}>
+          <Button size="sm" className="h-9 px-6 text-sm gap-1.5" render={<Link href="/dashboard" />} nativeButton={false}>
             Start for free
             <ArrowRight className="w-3.5 h-3.5" />
           </Button>
