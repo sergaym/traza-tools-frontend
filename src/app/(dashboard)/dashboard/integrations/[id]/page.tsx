@@ -2,85 +2,88 @@
 
 import { use } from "react"
 import Link from "next/link"
+import useSWR, { useSWRConfig } from "swr"
 import { TopBar } from "@/components/top-bar"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
-import { ChevronLeft, Zap, GitBranch, Plus, CheckCircle2, Activity } from "lucide-react"
-
-// ─── Mock data ────────────────────────────────────────────────────────────────
-
-type IntegrationMeta = {
-  name: string
-  description: string
-  logo: string
-  logoColor: string
-  connected: boolean
-}
-
-type Tool = {
-  id: string
-  name: string
-  description: string
-  category: string
-  enabled: boolean
-  calls: number
-}
-
-type Trigger = {
-  id: string
-  name: string
-  event: string
-  active: boolean
-  lastFired: string
-  totalFired: number
-}
-
-const INTEGRATIONS: Record<string, IntegrationMeta> = {
-  github: { name: "GitHub", description: "Code hosting & version control", logo: "GH", logoColor: "bg-zinc-700 text-zinc-100", connected: true },
-  linear: { name: "Linear", description: "Issue tracking for software teams", logo: "LN", logoColor: "bg-violet-600 text-white", connected: true },
-  postgres: { name: "PostgreSQL", description: "Relational database queries", logo: "PG", logoColor: "bg-sky-600 text-white", connected: true },
-}
-
-const TOOLS: Record<string, Tool[]> = {
-  github: [
-    { id: "gh-create-issue", name: "create_issue", description: "Create a new issue in a GitHub repository", category: "write", enabled: true, calls: 84 },
-    { id: "gh-get-pr", name: "get_pull_request", description: "Retrieve pull request details by number", category: "read", enabled: true, calls: 210 },
-    { id: "gh-merge-pr", name: "merge_pull_request", description: "Merge a pull request into its base branch", category: "write", enabled: false, calls: 12 },
-  ],
-  linear: [
-    { id: "ln-create-issue", name: "create_issue", description: "Create a new issue in a Linear project", category: "write", enabled: true, calls: 57 },
-    { id: "ln-list-issues", name: "list_issues", description: "List all issues matching a filter", category: "read", enabled: true, calls: 338 },
-  ],
-  postgres: [
-    { id: "pg-query", name: "run_query", description: "Execute a read-only SQL query against the database", category: "read", enabled: true, calls: 509 },
-    { id: "pg-insert", name: "insert_row", description: "Insert a new row into a specified table", category: "write", enabled: false, calls: 0 },
-  ],
-}
-
-const TRIGGERS: Record<string, Trigger[]> = {
-  github: [
-    { id: "t1", name: "PR Merged", event: "pull_request.merged", active: true, lastFired: "1 hr ago", totalFired: 42 },
-    { id: "t2", name: "Issue Opened", event: "issues.opened", active: false, lastFired: "Never", totalFired: 0 },
-  ],
-  linear: [
-    { id: "t3", name: "Issue Created", event: "issue.created", active: true, lastFired: "3 hr ago", totalFired: 97 },
-  ],
-  postgres: [],
-}
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
+import { Skeleton } from "@/components/ui/skeleton"
+import { ChevronLeft, Zap, GitBranch, Activity } from "lucide-react"
+import { providersService } from "@/modules/providers/services/providers-service"
+import { toolsService } from "@/modules/tools/services/tools-service"
+import { connectionsService } from "@/modules/connections/services/connections-service"
+import { triggersService } from "@/modules/triggers/services/triggers-service"
+import type { ToolSummary } from "@/modules/tools/types"
+import type { TriggerSubscription } from "@/modules/triggers/types"
+import type { Connection } from "@/modules/connections/types"
+import { toast } from "sonner"
 
 export default function IntegrationDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
-  const integration = INTEGRATIONS[id]
+  const { mutate } = useSWRConfig()
 
-  if (!integration) {
+  const { data: provider, isLoading: loadingProvider } = useSWR(
+    `/v1/providers/${id}`,
+    () => providersService.getById(id),
+    { onError: () => toast.error("Failed to load provider") }
+  )
+
+  const { data: toolsPage, isLoading: loadingTools } = useSWR(
+    `/v1/tools?provider_id=${id}`,
+    () => toolsService.getAll({ limit: 100 }),
+    { onError: () => toast.error("Failed to load tools") }
+  )
+
+  const { data: allConnections, isLoading: loadingConnections } = useSWR(
+    "/v1/connections",
+    () => connectionsService.getAll(),
+    { onError: () => toast.error("Failed to load connections") }
+  )
+
+  const { data: allTriggers, isLoading: loadingTriggers } = useSWR(
+    "/v1/triggers",
+    () => triggersService.getAll(),
+    { onError: () => toast.error("Failed to load triggers") }
+  )
+
+  const tools = (toolsPage?.data ?? []).filter((t: ToolSummary) => t.provider_id === id)
+  const connection = (allConnections ?? []).find((c: Connection) => c.provider_id === id)
+  const triggers = (allTriggers ?? []).filter((t: TriggerSubscription) => t.provider_id === id)
+
+  async function handleDisconnect() {
+    if (!connection) return
+    try {
+      await connectionsService.delete(connection.id)
+      await mutate("/v1/connections")
+      toast.success("Disconnected")
+    } catch {
+      toast.error("Failed to disconnect")
+    }
+  }
+
+  if (loadingProvider) {
+    return (
+      <>
+        <TopBar title={<Skeleton className="h-4 w-32" />} />
+        <main className="flex-1 p-6 max-w-4xl w-full mx-auto space-y-5">
+          <div className="flex items-center gap-4">
+            <Skeleton className="w-10 h-10 rounded-xl" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-28" />
+              <Skeleton className="h-3 w-48" />
+            </div>
+          </div>
+        </main>
+      </>
+    )
+  }
+
+  if (!provider) {
     return (
       <div className="flex flex-col items-center justify-center flex-1 gap-3 text-center p-10">
-        <p className="text-sm text-muted-foreground">Integration not found</p>
+        <p className="text-sm text-muted-foreground">Provider not found</p>
         <Link href="/dashboard/integrations">
           <Button variant="outline" size="sm">Back to integrations</Button>
         </Link>
@@ -88,8 +91,7 @@ export default function IntegrationDetailPage({ params }: { params: Promise<{ id
     )
   }
 
-  const tools = TOOLS[id] ?? []
-  const triggers = TRIGGERS[id] ?? []
+  const initials = provider.name.slice(0, 2).toUpperCase()
 
   return (
     <>
@@ -100,57 +102,55 @@ export default function IntegrationDetailPage({ params }: { params: Promise<{ id
               Integrations
             </Link>
             <ChevronLeft className="w-3 h-3 text-muted-foreground rotate-180" />
-            <span>{integration.name}</span>
+            <span>{provider.name}</span>
           </span>
         }
-        badge={integration.connected ? "Connected" : "Disconnected"}
+        badge={connection ? "Connected" : "Not connected"}
       />
       <main className="flex-1 p-6 space-y-5 max-w-4xl w-full mx-auto">
-        {/* Integration header */}
         <div className="flex items-center gap-4">
-          <div className={`w-10 h-10 rounded-xl shrink-0 flex items-center justify-center text-sm font-bold ${integration.logoColor}`}>
-            {integration.logo}
+          <div className="w-10 h-10 rounded-xl shrink-0 flex items-center justify-center text-sm font-bold bg-primary/10 text-primary">
+            {initials}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h2 className="text-base font-semibold text-foreground">{integration.name}</h2>
-              {integration.connected && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />}
-            </div>
-            <p className="text-xs text-muted-foreground">{integration.description}</p>
+            <p className="text-base font-semibold text-foreground">{provider.name}</p>
+            <p className="text-xs text-muted-foreground">
+              {provider.tool_count} tool{provider.tool_count !== 1 ? "s" : ""} · {provider.trigger_count} trigger{provider.trigger_count !== 1 ? "s" : ""}
+            </p>
           </div>
-          <Button variant="outline" size="sm" className="h-7 text-xs border-border/60 text-destructive hover:text-destructive hover:border-destructive/40">
-            Disconnect
-          </Button>
+          {connection && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs border-border/60 text-destructive hover:text-destructive hover:border-destructive/40"
+              onClick={handleDisconnect}
+            >
+              Disconnect
+            </Button>
+          )}
         </div>
 
         <Separator className="opacity-40" />
 
-        {/* Tabs */}
         <Tabs defaultValue="tools">
-          <div className="flex items-center justify-between">
-            <TabsList className="h-8 bg-muted/40 border border-border/40">
-              <TabsTrigger value="tools" className="text-xs h-6 gap-1.5">
-                <Zap className="w-3 h-3" />
-                Tools
-                <Badge variant="secondary" className="text-xs font-normal h-4 px-1 ml-0.5">{tools.length}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="triggers" className="text-xs h-6 gap-1.5">
-                <GitBranch className="w-3 h-3" />
-                Triggers
-                <Badge variant="secondary" className="text-xs font-normal h-4 px-1 ml-0.5">{triggers.length}</Badge>
-              </TabsTrigger>
-            </TabsList>
-            <Button size="sm" className="h-7 text-xs gap-1.5">
-              <Plus className="w-3 h-3" />
-              Add
-            </Button>
-          </div>
+          <TabsList className="h-8 bg-muted/40 border border-border/40">
+            <TabsTrigger value="tools" className="text-xs h-6 gap-1.5">
+              <Zap className="w-3 h-3" />
+              Tools
+              <Badge variant="secondary" className="text-xs font-normal h-4 px-1 ml-0.5">{tools.length}</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="triggers" className="text-xs h-6 gap-1.5">
+              <GitBranch className="w-3 h-3" />
+              Triggers
+              <Badge variant="secondary" className="text-xs font-normal h-4 px-1 ml-0.5">{triggers.length}</Badge>
+            </TabsTrigger>
+          </TabsList>
 
           <TabsContent value="tools" className="mt-4">
-            <ToolsPanel tools={tools} />
+            <ToolsPanel tools={tools} loading={loadingTools} />
           </TabsContent>
           <TabsContent value="triggers" className="mt-4">
-            <TriggersPanel triggers={triggers} />
+            <TriggersPanel triggers={triggers} loading={loadingTriggers} />
           </TabsContent>
         </Tabs>
       </main>
@@ -158,14 +158,32 @@ export default function IntegrationDetailPage({ params }: { params: Promise<{ id
   )
 }
 
-// ─── Tools panel ──────────────────────────────────────────────────────────────
+function ToolsPanel({ tools, loading }: { tools: ToolSummary[]; loading: boolean }) {
+  if (loading) {
+    return (
+      <Card className="bg-card border-border/50">
+        <CardContent className="p-0">
+          <ul className="divide-y divide-border/30">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <li key={i} className="flex items-center gap-3 px-4 py-3">
+                <Skeleton className="w-6 h-6 rounded" />
+                <div className="flex-1 space-y-1.5">
+                  <Skeleton className="h-3 w-32" />
+                  <Skeleton className="h-3 w-64" />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
+    )
+  }
 
-function ToolsPanel({ tools }: { tools: Tool[] }) {
   if (tools.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
         <Zap className="w-7 h-7 text-muted-foreground/30" />
-        <p className="text-sm text-muted-foreground">No tools configured</p>
+        <p className="text-sm text-muted-foreground">No tools available</p>
       </div>
     )
   }
@@ -175,35 +193,17 @@ function ToolsPanel({ tools }: { tools: Tool[] }) {
       <CardContent className="p-0">
         <ul className="divide-y divide-border/30">
           {tools.map((tool) => (
-            <li key={tool.id} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/20 transition-colors">
+            <li key={tool.tool_slug} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/20 transition-colors">
               <div className="p-1.5 rounded bg-muted/60 text-muted-foreground shrink-0">
                 <Zap className="w-3 h-3" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <code className="text-xs font-mono text-foreground">{tool.name}</code>
-                  <Badge
-                    variant="outline"
-                    className={`text-xs font-normal border-0 px-1.5 ${
-                      tool.category === "write" ? "bg-amber-400/10 text-amber-500" : "bg-sky-400/10 text-sky-500"
-                    }`}
-                  >
-                    {tool.category}
-                  </Badge>
-                </div>
-                <p className="text-xs text-muted-foreground truncate">{tool.description}</p>
+                <code className="text-xs font-mono text-foreground">{tool.tool_id}</code>
+                <p className="text-xs text-muted-foreground">v{tool.version}</p>
               </div>
-              <div className="flex items-center gap-3 shrink-0">
-                <span className="text-xs text-muted-foreground hidden sm:block">{tool.calls.toLocaleString()} calls</span>
-                <Badge
-                  variant="secondary"
-                  className={`text-xs font-normal ${
-                    tool.enabled ? "text-emerald-500 bg-emerald-400/10" : "text-muted-foreground bg-muted/60"
-                  }`}
-                >
-                  {tool.enabled ? "Enabled" : "Disabled"}
-                </Badge>
-              </div>
+              <Badge variant="secondary" className="text-xs font-normal shrink-0">
+                {tool.tool_slug}
+              </Badge>
             </li>
           ))}
         </ul>
@@ -212,14 +212,30 @@ function ToolsPanel({ tools }: { tools: Tool[] }) {
   )
 }
 
-// ─── Triggers panel ───────────────────────────────────────────────────────────
+function TriggersPanel({ triggers, loading }: { triggers: TriggerSubscription[]; loading: boolean }) {
+  if (loading) {
+    return (
+      <div className="space-y-2">
+        {Array.from({ length: 2 }).map((_, i) => (
+          <Card key={i} className="bg-card border-border/50">
+            <CardContent className="flex items-center gap-4 px-4 py-3">
+              <Skeleton className="w-6 h-6 rounded" />
+              <div className="flex-1 space-y-1.5">
+                <Skeleton className="h-3.5 w-28" />
+                <Skeleton className="h-3 w-40" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
+  }
 
-function TriggersPanel({ triggers }: { triggers: Trigger[] }) {
   if (triggers.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
         <Activity className="w-7 h-7 text-muted-foreground/30" />
-        <p className="text-sm text-muted-foreground">No triggers configured</p>
+        <p className="text-sm text-muted-foreground">No active trigger subscriptions</p>
       </div>
     )
   }
@@ -233,22 +249,12 @@ function TriggersPanel({ triggers }: { triggers: Trigger[] }) {
               <GitBranch className="w-3.5 h-3.5" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground">{trigger.name}</p>
-              <code className="text-xs font-mono text-muted-foreground">{trigger.event}</code>
+              <p className="text-sm font-medium text-foreground">{trigger.trigger_id}</p>
+              <code className="text-xs font-mono text-muted-foreground truncate">{trigger.callback_url}</code>
             </div>
-            <div className="flex items-center gap-4 shrink-0">
-              <div className="text-right hidden sm:block">
-                <p className="text-xs text-muted-foreground">Last fired</p>
-                <p className="text-xs font-medium text-foreground">{trigger.lastFired}</p>
-              </div>
-              <div className="text-right hidden sm:block">
-                <p className="text-xs text-muted-foreground">Total</p>
-                <p className="text-xs font-medium text-foreground">{trigger.totalFired}</p>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className={`w-1.5 h-1.5 rounded-full ${trigger.active ? "bg-emerald-400" : "bg-muted-foreground/40"}`} />
-                <span className="text-xs text-muted-foreground">{trigger.active ? "Active" : "Paused"}</span>
-              </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className={`w-1.5 h-1.5 rounded-full ${trigger.status === "active" ? "bg-emerald-400" : "bg-muted-foreground/40"}`} />
+              <span className="text-xs text-muted-foreground capitalize">{trigger.status}</span>
             </div>
           </CardContent>
         </Card>
