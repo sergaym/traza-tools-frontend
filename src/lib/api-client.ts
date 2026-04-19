@@ -8,6 +8,7 @@ type RequestOptions = {
 }
 
 let cachedToken: { token: string; expMs: number } | null = null
+let inflightToken: Promise<string | null> | null = null
 
 function jwtExpMs(token: string): number {
   try {
@@ -22,14 +23,8 @@ export function clearTrazaTokenCache() {
   cachedToken = null
 }
 
-async function getTrazaBearerToken(): Promise<string | null> {
-  if (typeof window === "undefined") {
-    return null
-  }
+async function fetchToken(): Promise<string | null> {
   const now = Date.now()
-  if (cachedToken && cachedToken.expMs > now + 30_000) {
-    return cachedToken.token
-  }
   const r = await fetch(`${window.location.origin}/api/traza/token`, { credentials: "include" })
   if (!r.ok) {
     cachedToken = null
@@ -37,11 +32,17 @@ async function getTrazaBearerToken(): Promise<string | null> {
   }
   const { token } = (await r.json()) as { token: string }
   const expMs = jwtExpMs(token)
-  cachedToken = {
-    token,
-    expMs: expMs || now + 14 * 60 * 1000,
-  }
+  cachedToken = { token, expMs: expMs || now + 14 * 60 * 1000 }
   return token
+}
+
+async function getTrazaBearerToken(): Promise<string | null> {
+  if (typeof window === "undefined") return null
+  const now = Date.now()
+  if (cachedToken && cachedToken.expMs > now + 30_000) return cachedToken.token
+  if (inflightToken) return inflightToken
+  inflightToken = fetchToken().finally(() => { inflightToken = null })
+  return inflightToken
 }
 
 async function request<T>(

@@ -40,12 +40,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setMeLoading(false)
       return
     }
+    let cancelled = false
     setMeLoading(true)
     apiClient.get<AuthUser>("/v1/auth/me")
-      .then(setUser)
-      .catch(() => setUser(null))
-      .finally(() => setMeLoading(false))
-  }, [session, isPending, orgId])
+      .then(u => { if (!cancelled) setUser(u) })
+      .catch(() => { if (!cancelled) setUser(null) })
+      .finally(() => { if (!cancelled) setMeLoading(false) })
+    return () => { cancelled = true }
+  }, [session, isPending])
 
   const refreshUser = useCallback(async () => {
     clearTrazaTokenCache()
