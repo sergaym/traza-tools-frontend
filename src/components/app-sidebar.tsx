@@ -49,15 +49,15 @@ const secondaryNav = [
 export function AppSidebar() {
   const pathname = usePathname()
   const router = useRouter()
-  const { user, apiKey, logout } = useAuth()
+  const { user, logout } = useAuth()
 
-  function handleLogout() {
-    logout()
+  async function handleLogout() {
+    await logout()
     router.push("/")
   }
 
   const title = user?.organization.name ?? "Workspace"
-  const subtitle = user?.name || (apiKey ? `${apiKey.slice(0, 8)}…` : "Sign in")
+  const subtitle = user?.name || user?.email || "Member"
   const initials = (user?.organization.name ?? title).slice(0, 2).toUpperCase()
 
   return (

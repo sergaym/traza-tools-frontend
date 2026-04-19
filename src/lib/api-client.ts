@@ -1,5 +1,4 @@
 import type { ApiError } from "@/lib/types"
-import { getStoredApiKey } from "@/lib/auth-context"
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? ""
 
@@ -22,14 +21,10 @@ async function request<T>(
     }
   }
 
-  const apiKey = getStoredApiKey()
-  const authHeaders: Record<string, string> = apiKey ? { "X-API-Key": apiKey } : {}
-
   const response = await fetch(url.toString(), {
     method,
     headers: {
       "Content-Type": "application/json",
-      ...authHeaders,
       ...options.headers,
     },
     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),

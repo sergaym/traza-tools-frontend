@@ -12,23 +12,24 @@ import { Eye, EyeOff } from "lucide-react"
 export default function LoginPage() {
   const { login } = useAuth()
   const router = useRouter()
-  const [apiKey, setApiKey] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
   const [show, setShow] = useState(false)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const trimmed = apiKey.trim()
-    if (!trimmed) return
+    const em = email.trim()
+    if (!em || !password) return
 
     setError("")
     setLoading(true)
     try {
-      login(trimmed)
+      await login(em, password)
       router.push("/dashboard")
     } catch {
-      setError("Invalid API key. Check your key and try again.")
+      setError("Invalid email or password.")
     } finally {
       setLoading(false)
     }
@@ -39,25 +40,38 @@ export default function LoginPage() {
       <div className="mb-8">
         <h1 className="text-xl font-semibold text-foreground tracking-tight">Sign in</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Enter your API key to access the dashboard
+          Use your workspace account to access the dashboard
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="api-key" className="text-xs font-medium">
-            API Key
+          <Label htmlFor="email" className="text-xs font-medium">
+            Email
+          </Label>
+          <Input
+            id="email"
+            type="email"
+            autoComplete="email"
+            placeholder="you@company.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="text-sm"
+            autoFocus
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="password" className="text-xs font-medium">
+            Password
           </Label>
           <div className="relative">
             <Input
-              id="api-key"
+              id="password"
               type={show ? "text" : "password"}
-              placeholder="trz_••••••••••••••••"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              className="pr-9 font-mono text-sm"
               autoComplete="current-password"
-              autoFocus
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="pr-9 text-sm"
             />
             <button
               type="button"
@@ -71,15 +85,15 @@ export default function LoginPage() {
           {error && <p className="text-xs text-destructive">{error}</p>}
         </div>
 
-        <Button type="submit" className="w-full" disabled={loading || !apiKey.trim()}>
+        <Button type="submit" className="w-full" disabled={loading || !email.trim() || !password}>
           {loading ? "Signing in…" : "Sign in"}
         </Button>
       </form>
 
       <p className="mt-6 text-center text-xs text-muted-foreground">
-        Don&apos;t have an API key?{" "}
+        No workspace yet?{" "}
         <Link href="/auth/signup" className="text-foreground hover:underline underline-offset-4">
-          Get started
+          Create one
         </Link>
       </p>
     </div>
