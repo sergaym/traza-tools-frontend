@@ -9,7 +9,6 @@ import {
   HelpCircle,
   ChevronDown,
   Zap,
-  GitBranch,
   Users,
 } from "lucide-react"
 import {
@@ -40,7 +39,6 @@ const mainNav = [
   { label: "Toolkits", href: "/dashboard/toolkits", icon: Puzzle },
   { label: "Accounts", href: "/dashboard/accounts", icon: Users },
   { label: "Logs", href: "/dashboard/logs", icon: ScrollText },
-  { label: "Triggers", href: "/dashboard/triggers", icon: GitBranch },
 ]
 
 const secondaryNav = [
