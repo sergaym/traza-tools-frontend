@@ -30,8 +30,8 @@ export default function IntegrationsPage() {
   )
 
   const { data: connections, isLoading: loadingConnections } = useSWR(
-    "/v1/connections",
-    () => connectionsService.getAll(),
+    TRAZA_USER_ID ? ["/v1/connections", TRAZA_USER_ID] : null,
+    () => connectionsService.getAll(TRAZA_USER_ID),
     { onError: () => toast.error("Failed to load connections") }
   )
 

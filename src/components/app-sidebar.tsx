@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import {
   Puzzle,
   ScrollText,
@@ -9,6 +9,7 @@ import {
   HelpCircle,
   ChevronDown,
   Zap,
+  GitBranch,
 } from "lucide-react"
 import {
   Sidebar,
@@ -23,7 +24,7 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,10 +33,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
+import { useAuth } from "@/lib/auth-context"
 
 const mainNav = [
   { label: "Integrations", href: "/dashboard/integrations", icon: Puzzle },
   { label: "Logs", href: "/dashboard/logs", icon: ScrollText },
+  { label: "Triggers", href: "/dashboard/triggers", icon: GitBranch },
 ]
 
 const secondaryNav = [
@@ -45,6 +48,17 @@ const secondaryNav = [
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const { user, apiKey, logout } = useAuth()
+
+  function handleLogout() {
+    logout()
+    router.push("/")
+  }
+
+  const title = user?.organization.name ?? "Workspace"
+  const subtitle = user?.name || (apiKey ? `${apiKey.slice(0, 8)}…` : "Sign in")
+  const initials = (user?.organization.name ?? title).slice(0, 2).toUpperCase()
 
   return (
     <Sidebar className="border-r border-border/50">
@@ -137,24 +151,23 @@ export function AppSidebar() {
             render={
               <div className="flex items-center gap-2.5 w-full px-2 py-2 rounded-md hover:bg-sidebar-accent/50 transition-colors cursor-pointer group">
                 <Avatar className="w-7 h-7 shrink-0">
-                  <AvatarImage src="" />
                   <AvatarFallback className="text-xs bg-primary/20 text-primary font-semibold">
-                    JD
+                    {initials}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0 text-left">
-                  <p className="text-xs font-medium text-foreground truncate">John Doe</p>
-                  <p className="text-xs text-muted-foreground truncate">john@example.com</p>
+                  <p className="text-xs font-medium text-foreground truncate">{title}</p>
+                  <p className="text-xs text-muted-foreground truncate">{subtitle}</p>
                 </div>
                 <ChevronDown className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
               </div>
             }
           />
           <DropdownMenuContent align="end" side="top" className="w-48">
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>API Keys</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive focus:text-destructive">
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onClick={handleLogout}
+            >
               Sign out
             </DropdownMenuItem>
           </DropdownMenuContent>

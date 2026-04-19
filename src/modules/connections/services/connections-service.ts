@@ -14,16 +14,21 @@ class ConnectionsService {
     return apiClient.post<CreateConnectionResponse>(`${this.basePath}/`, data)
   }
 
-  async getAll(): Promise<Connection[]> {
-    return apiClient.get<Connection[]>(`${this.basePath}/`)
+  async getAll(userId: string, params?: { provider_id?: string }): Promise<Connection[]> {
+    return apiClient.get<Connection[]>(`${this.basePath}/`, {
+      user_id: userId,
+      ...params,
+    })
   }
 
-  async getById(connectedAccountId: string): Promise<Connection> {
-    return apiClient.get<Connection>(`${this.basePath}/${connectedAccountId}`)
+  async getById(connectedAccountId: string, userId: string): Promise<Connection> {
+    return apiClient.get<Connection>(`${this.basePath}/${connectedAccountId}`, {
+      user_id: userId,
+    })
   }
 
-  async delete(connectedAccountId: string): Promise<void> {
-    return apiClient.delete(`${this.basePath}/${connectedAccountId}`)
+  async delete(connectedAccountId: string, userId: string): Promise<void> {
+    return apiClient.delete(`${this.basePath}/${connectedAccountId}`, { user_id: userId })
   }
 
   async initiateOAuth(data: InitiateOAuthRequest): Promise<OAuthInitiateResponse> {

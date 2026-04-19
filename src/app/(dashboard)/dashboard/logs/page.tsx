@@ -14,6 +14,8 @@ import { toolsService } from "@/modules/tools/services/tools-service"
 import type { ExecutionLog } from "@/modules/tools/types"
 import { toast } from "sonner"
 
+const TRAZA_USER_ID = process.env.NEXT_PUBLIC_TRAZA_USER_ID ?? ""
+
 type LogStatus = "success" | "error" | "running"
 
 const STATUS_CONFIG: Record<string, { icon: typeof CheckCircle2; className: string }> = {
@@ -27,8 +29,8 @@ export default function LogsPage() {
   const [tab, setTab] = useState("all")
 
   const { data: logs, isLoading } = useSWR(
-    "/v1/tools/logs",
-    () => toolsService.getLogs(),
+    TRAZA_USER_ID ? ["/v1/tools/logs", TRAZA_USER_ID] : null,
+    () => toolsService.getLogs(TRAZA_USER_ID),
     { onError: () => toast.error("Failed to load logs") }
   )
 

@@ -9,10 +9,12 @@ import { triggersService } from "@/modules/triggers/services/triggers-service"
 import type { TriggerSubscription } from "@/modules/triggers/types"
 import { toast } from "sonner"
 
+const TRAZA_USER_ID = process.env.NEXT_PUBLIC_TRAZA_USER_ID ?? ""
+
 export default function TriggersPage() {
   const { data: triggers, isLoading } = useSWR(
-    "/v1/triggers",
-    () => triggersService.getAll(),
+    TRAZA_USER_ID ? ["/v1/triggers", TRAZA_USER_ID] : null,
+    () => triggersService.getAll(TRAZA_USER_ID),
     { onError: () => toast.error("Failed to load triggers") }
   )
 

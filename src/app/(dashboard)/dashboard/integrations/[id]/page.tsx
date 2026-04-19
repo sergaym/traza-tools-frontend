@@ -20,6 +20,8 @@ import type { TriggerSubscription } from "@/modules/triggers/types"
 import type { Connection } from "@/modules/connections/types"
 import { toast } from "sonner"
 
+const TRAZA_USER_ID = process.env.NEXT_PUBLIC_TRAZA_USER_ID ?? ""
+
 export default function IntegrationDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const { mutate } = useSWRConfig()
@@ -37,14 +39,14 @@ export default function IntegrationDetailPage({ params }: { params: Promise<{ id
   )
 
   const { data: allConnections, isLoading: loadingConnections } = useSWR(
-    "/v1/connections",
-    () => connectionsService.getAll(),
+    TRAZA_USER_ID ? ["/v1/connections", TRAZA_USER_ID] : null,
+    () => connectionsService.getAll(TRAZA_USER_ID),
     { onError: () => toast.error("Failed to load connections") }
   )
 
   const { data: allTriggers, isLoading: loadingTriggers } = useSWR(
-    "/v1/triggers",
-    () => triggersService.getAll(),
+    TRAZA_USER_ID ? ["/v1/triggers", TRAZA_USER_ID] : null,
+    () => triggersService.getAll(TRAZA_USER_ID),
     { onError: () => toast.error("Failed to load triggers") }
   )
 
@@ -55,8 +57,8 @@ export default function IntegrationDetailPage({ params }: { params: Promise<{ id
   async function handleDisconnect() {
     if (!connection) return
     try {
-      await connectionsService.delete(connection.id)
-      await mutate("/v1/connections")
+      await connectionsService.delete(connection.id, TRAZA_USER_ID)
+      await mutate(TRAZA_USER_ID ? ["/v1/connections", TRAZA_USER_ID] : null)
       toast.success("Disconnected")
     } catch {
       toast.error("Failed to disconnect")

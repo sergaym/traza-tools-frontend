@@ -43,8 +43,9 @@ async function request<T>(
     } catch {
       // non-JSON error body
     }
+    const detail = (errorBody as { detail?: string }).detail
     const err: ApiError = {
-      message: errorBody.message ?? response.statusText,
+      message: detail ?? errorBody.message ?? response.statusText,
       status: response.status,
       code: errorBody.code,
     }
@@ -65,6 +66,6 @@ export const apiClient = {
     request<T>("PATCH", path, body),
   put: <T>(path: string, body?: unknown) =>
     request<T>("PUT", path, body),
-  delete: <T = void>(path: string) =>
-    request<T>("DELETE", path),
+  delete: <T = void>(path: string, params?: RequestOptions["params"]) =>
+    request<T>("DELETE", path, undefined, { params }),
 }

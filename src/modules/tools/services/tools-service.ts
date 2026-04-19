@@ -17,8 +17,14 @@ class ToolsService {
     return apiClient.post(`${this.basePath}/execute/${toolSlug}`, data)
   }
 
-  async getLogs(): Promise<ExecutionLog[]> {
-    return apiClient.get<ExecutionLog[]>(`${this.basePath}/logs`)
+  async getLogs(
+    userId: string,
+    params?: { provider_id?: string; tool_id?: string; limit?: number; offset?: number }
+  ): Promise<ExecutionLog[]> {
+    return apiClient.get<ExecutionLog[]>(`${this.basePath}/logs`, {
+      user_id: userId,
+      ...params,
+    })
   }
 
   async getLogById(logId: string): Promise<ExecutionLogDetail> {
