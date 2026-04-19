@@ -4,11 +4,19 @@ import { useState } from "react"
 import Link from "next/link"
 import useSWR from "swr"
 import { TopBar } from "@/components/top-bar"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import {
   Dialog,
   DialogContent,
@@ -62,47 +70,60 @@ export default function AccountsPage() {
           </Button>
         }
       />
-      <main className="flex-1 p-6 space-y-5 max-w-3xl w-full mx-auto">
+      <main className="flex-1 p-6 space-y-4 max-w-4xl w-full mx-auto">
         <p className="text-xs text-muted-foreground">
           Accounts represent your end-users or tenants (e.g. a client workspace). Connections and triggers are scoped per account.
         </p>
 
-        {isLoading ? (
-          <div className="space-y-2">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-16 w-full rounded-lg" />
-            ))}
-          </div>
-        ) : accounts.length === 0 ? (
-          <Card className="bg-card border-border/50">
-            <CardContent className="py-12 text-center text-sm text-muted-foreground">
-              No accounts yet. Create one to connect toolkits.
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-2">
-            {accounts.map((a: Account) => (
-              <Link key={a.id} href={`/dashboard/accounts/${a.id}`}>
-                <Card className="bg-card border-border/50 hover:border-border transition-colors cursor-pointer">
-                  <CardHeader className="py-3 px-4 flex-row items-center justify-between gap-4">
-                    <div className="min-w-0">
-                      <CardTitle className="text-sm font-medium truncate">{a.external_id}</CardTitle>
-                      <CardDescription className="text-xs">
-                        {a.connection_count ?? 0} connection{(a.connection_count ?? 0) !== 1 ? "s" : ""}
-                        {a.created_at && (
-                          <span className="text-muted-foreground/80">
-                            {" · "}
-                            {new Date(a.created_at).toLocaleDateString()}
-                          </span>
-                        )}
-                      </CardDescription>
-                    </div>
-                  </CardHeader>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        )}
+        <Card className="border-border/50 overflow-hidden">
+          <CardContent className="p-0">
+            {isLoading ? (
+              <div className="divide-y divide-border/30">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-4 px-4 py-3">
+                    <Skeleton className="h-3 w-40" />
+                    <Skeleton className="h-3 w-16 ml-auto" />
+                    <Skeleton className="h-3 w-24" />
+                  </div>
+                ))}
+              </div>
+            ) : accounts.length === 0 ? (
+              <div className="py-16 text-center text-sm text-muted-foreground">
+                No accounts yet. Create one to connect toolkits.
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent border-border/40">
+                    <TableHead className="text-xs text-muted-foreground px-4 w-full">External ID</TableHead>
+                    <TableHead className="text-xs text-muted-foreground px-4">Connections</TableHead>
+                    <TableHead className="text-xs text-muted-foreground px-4">Created</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {accounts.map((a: Account) => (
+                    <TableRow key={a.id} className="border-border/30 cursor-pointer">
+                      <TableCell className="px-4 py-3">
+                        <Link
+                          href={`/dashboard/accounts/${a.id}`}
+                          className="text-sm font-medium text-foreground hover:underline"
+                        >
+                          {a.external_id}
+                        </Link>
+                      </TableCell>
+                      <TableCell className="px-4 py-3 text-xs text-muted-foreground">
+                        {a.connection_count ?? 0}
+                      </TableCell>
+                      <TableCell className="px-4 py-3 text-xs text-muted-foreground">
+                        {a.created_at ? new Date(a.created_at).toLocaleDateString() : "—"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
       </main>
 
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>

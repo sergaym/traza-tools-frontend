@@ -14,12 +14,6 @@ import {
   ChevronRight,
 } from "lucide-react"
 
-const INTEGRATIONS = [
-  "GitHub", "Linear", "Slack", "Notion", "Jira", "Figma",
-  "PostgreSQL", "Stripe", "Gmail", "Discord", "Airtable", "HubSpot",
-  "Salesforce", "Zendesk", "Datadog", "PagerDuty",
-]
-
 const FEATURES = [
   {
     icon: Puzzle,
@@ -102,15 +96,14 @@ export default function LandingPage() {
 
         <div className="flex items-center justify-center gap-3">
           <Button size="sm" className="h-9 px-5 text-sm gap-1.5" render={<Link href="/dashboard" />} nativeButton={false}>
-              Start building
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Button>
-            <Button variant="outline" size="sm" className="h-9 px-5 text-sm border-border" render={<Link href="/docs" />} nativeButton={false}>
-              Read the docs
-            </Button>
+            Start building
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Button>
+          <Button variant="outline" size="sm" className="h-9 px-5 text-sm border-border" render={<Link href="/docs" />} nativeButton={false}>
+            Read the docs
+          </Button>
         </div>
 
-        {/* Code snippet */}
         <div className="mt-14 max-w-2xl mx-auto text-left">
           <div className="rounded-lg border border-border bg-muted/30 overflow-hidden">
             <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-border bg-muted/50">
@@ -156,28 +149,6 @@ export default function LandingPage() {
               </code>
             </pre>
           </div>
-        </div>
-      </section>
-
-      <Separator />
-
-      {/* Integration logos */}
-      <section id="integrations" className="max-w-6xl mx-auto px-6 py-14">
-        <p className="text-xs font-medium text-muted-foreground text-center uppercase tracking-wider mb-8">
-          Works with your entire stack
-        </p>
-        <div className="flex flex-wrap justify-center gap-2">
-          {INTEGRATIONS.map((name) => (
-            <span
-              key={name}
-              className="px-3 py-1.5 text-xs font-medium text-muted-foreground border border-border rounded-md bg-muted/30 hover:border-border/80 hover:text-foreground transition-colors"
-            >
-              {name}
-            </span>
-          ))}
-          <span className="px-3 py-1.5 text-xs font-medium text-primary border border-primary/30 rounded-md bg-primary/5">
-            +184 more
-          </span>
         </div>
       </section>
 
@@ -235,24 +206,6 @@ export default function LandingPage() {
                 <p className="text-sm font-medium text-foreground mb-1.5">{title}</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">{description}</p>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <Separator />
-
-      {/* Social proof */}
-      <section className="max-w-6xl mx-auto px-6 py-20">
-        <div className="grid sm:grid-cols-3 gap-4">
-          {[
-            { stat: "200+", label: "Integrations" },
-            { stat: "10ms", label: "Median tool latency" },
-            { stat: "99.9%", label: "Uptime SLA" },
-          ].map(({ stat, label }) => (
-            <div key={label} className="p-6 rounded-lg border border-border bg-card text-center">
-              <p className="text-3xl font-semibold text-foreground">{stat}</p>
-              <p className="text-xs text-muted-foreground mt-1">{label}</p>
             </div>
           ))}
         </div>
@@ -343,22 +296,6 @@ export default function LandingPage() {
               </Button>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="border-t border-border">
-        <div className="max-w-6xl mx-auto px-6 py-20 text-center">
-          <h2 className="text-2xl font-semibold tracking-tight text-foreground mb-3">
-            Ready to give your agents superpowers?
-          </h2>
-          <p className="text-sm text-muted-foreground mb-8 max-w-md mx-auto">
-            Connect your first integration in under 5 minutes. No credit card required.
-          </p>
-          <Button size="sm" className="h-9 px-6 text-sm gap-1.5" render={<Link href="/dashboard" />} nativeButton={false}>
-            Start for free
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Button>
         </div>
       </section>
     </>
