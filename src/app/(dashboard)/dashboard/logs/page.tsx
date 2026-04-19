@@ -5,6 +5,7 @@ import useSWR from "swr"
 import { TopBar } from "@/components/top-bar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -72,7 +73,8 @@ export default function LogsPage() {
           </Tabs>
         </div>
 
-        <div className="rounded-lg border border-border/50 bg-card overflow-hidden">
+        <Card className="border-border/50 overflow-hidden">
+          <CardContent className="p-0">
           {isLoading ? (
             <ul className="divide-y divide-border/30">
               {Array.from({ length: 6 }).map((_, i) => (
@@ -133,7 +135,8 @@ export default function LogsPage() {
               })}
             </ul>
           )}
-        </div>
+          </CardContent>
+        </Card>
       </main>
     </>
   )

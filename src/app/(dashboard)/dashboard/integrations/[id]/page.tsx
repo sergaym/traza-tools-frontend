@@ -87,9 +87,9 @@ export default function IntegrationDetailPage({ params }: { params: Promise<{ id
     return (
       <div className="flex flex-col items-center justify-center flex-1 gap-3 text-center p-10">
         <p className="text-sm text-muted-foreground">Provider not found</p>
-        <Link href="/dashboard/integrations">
-          <Button variant="outline" size="sm">Back to integrations</Button>
-        </Link>
+        <Button variant="outline" size="sm" render={<Link href="/dashboard/integrations" />} nativeButton={false}>
+          Back to integrations
+        </Button>
       </div>
     )
   }
@@ -252,8 +252,9 @@ function TriggersPanel({ triggers, loading }: { triggers: TriggerSubscription[];
               <code className="text-xs font-mono text-muted-foreground truncate">{trigger.callback_url}</code>
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
-              <span className={`w-1.5 h-1.5 rounded-full ${trigger.status === "active" ? "bg-emerald-400" : "bg-muted-foreground/40"}`} />
-              <span className="text-xs text-muted-foreground capitalize">{trigger.status}</span>
+              <Badge className={`text-xs font-normal border-0 ${trigger.status === "active" ? "text-emerald-600 bg-emerald-50" : "text-muted-foreground bg-muted"}`}>
+                {trigger.status}
+              </Badge>
             </div>
           </CardContent>
         </Card>

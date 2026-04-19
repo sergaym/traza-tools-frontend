@@ -3,6 +3,7 @@
 import useSWR from "swr"
 import { TopBar } from "@/components/top-bar"
 import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { GitBranch, Activity } from "lucide-react"
 import { triggersService } from "@/modules/triggers/services/triggers-service"
@@ -59,8 +60,9 @@ export default function TriggersPage() {
                       <code className="text-xs font-mono text-foreground truncate max-w-[200px] block">{trigger.callback_url}</code>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className={`w-1.5 h-1.5 rounded-full ${trigger.status === "active" ? "bg-emerald-400" : "bg-muted-foreground/40"}`} />
-                      <span className="text-xs text-muted-foreground capitalize">{trigger.status}</span>
+                      <Badge className={`text-xs font-normal border-0 ${trigger.status === "active" ? "text-emerald-600 bg-emerald-50" : "text-muted-foreground bg-muted"}`}>
+                        {trigger.status}
+                      </Badge>
                     </div>
                   </div>
                 </CardContent>
