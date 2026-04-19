@@ -62,7 +62,7 @@ export default function ToolkitsPage() {
             {Array.from({ length: 8 }).map((_, i) => (
               <Card key={i} className="bg-card border-border/50">
                 <CardHeader className="flex-row items-center gap-3">
-                  <Skeleton className="w-9 h-9 rounded-lg shrink-0" />
+                  <Skeleton className="w-7 h-7 rounded-lg shrink-0" />
                   <Skeleton className="h-3.5 w-24" />
                 </CardHeader>
                 <CardFooter>
@@ -88,7 +88,7 @@ export default function ToolkitsPage() {
                     <ProviderIcon
                       name={provider.name}
                       iconUrl={provider.icon_url}
-                      className="w-9 h-9 rounded-lg text-xs shrink-0"
+                      className="w-7 h-7 rounded-lg text-xs shrink-0"
                     />
                     <CardTitle className="text-sm truncate">{provider.name}</CardTitle>
                   </CardHeader>
