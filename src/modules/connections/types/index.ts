@@ -9,6 +9,13 @@ export interface Connection {
   provider_icon_url?: string | null
 }
 
+/** Connection with owning account (org-wide list for a toolkit). */
+export interface LinkedConnection extends Connection {
+  user_id: string
+  user_external_id: string
+  user_display_name: string | null
+}
+
 export interface CreateConnectionRequest {
   user_id: string
   provider_id: string

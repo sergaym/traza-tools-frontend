@@ -4,6 +4,7 @@ import type {
   CreateConnectionRequest,
   CreateConnectionResponse,
   InitiateOAuthRequest,
+  LinkedConnection,
   OAuthInitiateResponse,
 } from "@/modules/connections/types"
 
@@ -19,6 +20,10 @@ class ConnectionsService {
       user_id: userId,
       ...params,
     })
+  }
+
+  async listForProvider(providerId: string): Promise<LinkedConnection[]> {
+    return apiClient.get<LinkedConnection[]>(`${this.basePath}/for-provider/${providerId}`)
   }
 
   async getById(connectedAccountId: string, userId: string): Promise<Connection> {
