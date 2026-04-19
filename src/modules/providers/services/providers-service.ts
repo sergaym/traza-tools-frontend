@@ -5,6 +5,7 @@ import type {
   ProviderDetail,
   ProviderToolItem,
   ProviderConnectionItem,
+  ConnectionFieldItem,
 } from "@/modules/providers/types"
 
 class ProvidersService {
@@ -40,6 +41,12 @@ class ProvidersService {
 
   async getConnectionDefinitions(providerId: string): Promise<ProviderConnectionItem[]> {
     return apiClient.get<ProviderConnectionItem[]>(`${this.basePath}/${providerId}/connections`)
+  }
+
+  async getConnectionFields(providerId: string, connectionId: string): Promise<ConnectionFieldItem[]> {
+    return apiClient.get<ConnectionFieldItem[]>(
+      `${this.basePath}/${providerId}/connections/${connectionId}/fields`
+    )
   }
 }
 

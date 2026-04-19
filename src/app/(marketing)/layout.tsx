@@ -37,17 +37,69 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
         </div>
       </header>
       {children}
-      <footer className="border-t border-border mt-auto">
-        <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <Image src="/traza-icon.svg" alt="Traza Tools" width={72} height={15} style={{ height: "auto" }} />
-          <div className="flex items-center gap-5">
-            {["Privacy", "Terms", "Docs", "Status"].map((item) => (
-              <Link key={item} href="#" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-                {item}
-              </Link>
-            ))}
+      <footer className="mt-auto bg-[#152023]">
+        <div className="max-w-6xl mx-auto px-6 pt-16 pb-10">
+          {/* Top row */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-10 pb-12 border-b border-white/10">
+            {/* Brand */}
+            <div className="col-span-2 md:col-span-1 flex flex-col gap-4">
+              <Image src="/traza-icon-white.svg" alt="Traza Tools" width={80} height={16} style={{ height: "auto" }} />
+              <p className="text-xs text-white/40 leading-relaxed max-w-[200px]">
+                The tool layer for AI agents. Connect, define, ship.
+              </p>
+            </div>
+
+            {/* Product */}
+            <div className="flex flex-col gap-3">
+              <p className="text-xs font-medium text-white/60 uppercase tracking-wider">Product</p>
+              {[
+                { label: "Features", href: "#features" },
+                { label: "Integrations", href: "#integrations" },
+                { label: "Pricing", href: "#pricing" },
+                { label: "Changelog", href: "#" },
+              ].map(({ label, href }) => (
+                <Link key={label} href={href} className="text-sm text-white/50 hover:text-white transition-colors">
+                  {label}
+                </Link>
+              ))}
+            </div>
+
+            {/* Developers */}
+            <div className="flex flex-col gap-3">
+              <p className="text-xs font-medium text-white/60 uppercase tracking-wider">Developers</p>
+              {[
+                { label: "Docs", href: "/docs" },
+                { label: "API Reference", href: "#" },
+                { label: "SDK", href: "#" },
+                { label: "Status", href: "#" },
+              ].map(({ label, href }) => (
+                <Link key={label} href={href} className="text-sm text-white/50 hover:text-white transition-colors">
+                  {label}
+                </Link>
+              ))}
+            </div>
+
+            {/* Company */}
+            <div className="flex flex-col gap-3">
+              <p className="text-xs font-medium text-white/60 uppercase tracking-wider">Company</p>
+              {[
+                { label: "About", href: "#" },
+                { label: "Blog", href: "#" },
+                { label: "Privacy", href: "#" },
+                { label: "Terms", href: "#" },
+              ].map(({ label, href }) => (
+                <Link key={label} href={href} className="text-sm text-white/50 hover:text-white transition-colors">
+                  {label}
+                </Link>
+              ))}
+            </div>
           </div>
-          <p className="text-xs text-muted-foreground">© 2026 Traza Tools</p>
+
+          {/* Bottom row */}
+          <div className="pt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <p className="text-xs text-white/30">© 2026 Traza Tools, Inc. All rights reserved.</p>
+            <p className="text-xs text-white/30">Built for the agentic era.</p>
+          </div>
         </div>
       </footer>
     </div>

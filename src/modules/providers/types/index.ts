@@ -19,8 +19,28 @@ export interface ProviderToolItem {
   description: string | null
 }
 
+export type ConnectionType =
+  | "oauth"
+  | "oauth_custom_credentials"
+  | "credentials"
+  | "ntlm"
+  | "sqs"
+  | "no_auth"
+
 export interface ProviderConnectionItem {
   connection_id: string
   name: string
   description: string | null
+  connection_type: ConnectionType
+}
+
+export interface ConnectionFieldItem {
+  name: string
+  label: string
+  type: string
+  placeholder: string | null
+  default: string | number | null
+  help: string | null
+  url: string | null
+  required: boolean
 }

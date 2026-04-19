@@ -76,17 +76,9 @@ export default function LandingPage() {
     <>
       {/* Hero */}
       <section className="max-w-6xl mx-auto px-6 pt-24 pb-20 text-center">
-        <Badge
-          variant="secondary"
-          className="mb-6 font-normal text-xs px-3 py-1 border border-border gap-1.5 inline-flex items-center"
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-foreground/40 inline-block" />
-          Now in beta — 200+ integrations available
-        </Badge>
-
-        <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-foreground leading-[1.1] mb-5 max-w-3xl mx-auto">
+        <h1 className="text-5xl sm:text-6xl font-semibold tracking-tight text-foreground leading-[1.1] mb-5 max-w-3xl mx-auto">
           The tool layer for<br />
-          <span className="text-primary">AI agents</span>
+          <span style={{ color: "var(--traza-blue)" }}>AI agents</span>
         </h1>
 
         <p className="text-base text-muted-foreground max-w-xl mx-auto leading-relaxed mb-8">
@@ -105,47 +97,54 @@ export default function LandingPage() {
         </div>
 
         <div className="mt-14 max-w-2xl mx-auto text-left">
-          <div className="rounded-lg border border-border bg-muted/30 overflow-hidden">
-            <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-border bg-muted/50">
-              <span className="w-2.5 h-2.5 rounded-full bg-border" />
-              <span className="w-2.5 h-2.5 rounded-full bg-border" />
-              <span className="w-2.5 h-2.5 rounded-full bg-border" />
-              <span className="text-xs text-muted-foreground ml-2 font-mono">agent.ts</span>
+          <div className="rounded-lg border border-border bg-white overflow-hidden shadow-sm">
+            <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-border bg-[#f5f5f5]">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[#febc2e]" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
+              <span className="text-xs text-[#6e6e6e] ml-2 font-mono">agent.ts</span>
             </div>
-            <pre className="px-5 py-4 text-xs font-mono leading-relaxed overflow-x-auto">
+            <pre className="px-5 py-4 text-xs font-mono leading-relaxed overflow-x-auto bg-white text-[#1e1e1e]">
               <code>
-                <span className="text-foreground/50">{"// Connect your stack to any AI agent"}</span>{"\n"}
-                <span className="text-foreground font-medium">import</span>
-                {" { TrazaClient } "}
-                <span className="text-foreground font-medium">from</span>
-                {" "}
-                <span className="text-stone-500 dark:text-stone-400">"@traza/sdk"</span>
+                <span className="text-[#6a9955]">{"// Connect your stack to any AI agent"}</span>{"\n"}
+                <span className="text-[#0000ff]">import</span>
+                <span className="text-[#1e1e1e]">{" { "}</span>
+                <span className="text-[#267f99]">TrazaClient</span>
+                <span className="text-[#1e1e1e]">{" } "}</span>
+                <span className="text-[#0000ff]">from</span>
+                <span className="text-[#a31515]">{' "@traza/sdk"'}</span>
                 {"\n\n"}
-                <span className="text-foreground font-medium">const</span>
-                {" traza = "}
-                <span className="text-foreground font-medium">new</span>
-                {" TrazaClient()\n"}
-                <span className="text-foreground font-medium">const</span>
-                {" tools = "}
-                <span className="text-foreground font-medium">await</span>
-                {" traza.getTools(["}
-                <span className="text-stone-500 dark:text-stone-400">"github"</span>
-                {", "}
-                <span className="text-stone-500 dark:text-stone-400">"linear"</span>
-                {", "}
-                <span className="text-stone-500 dark:text-stone-400">"slack"</span>
-                {"])\n\n"}
-                <span className="text-foreground/50">{"// Pass to your model directly"}</span>{"\n"}
-                <span className="text-foreground font-medium">const</span>
-                {" response = "}
-                <span className="text-foreground font-medium">await</span>
-                {" openai.chat.completions.create({\n"}
-                {"  model: "}
-                <span className="text-stone-500 dark:text-stone-400">"gpt-4o"</span>
-                {",\n  messages,\n  tools,\n})\n\n"}
-                <span className="text-foreground/50">{"// Execute the tool call"}</span>{"\n"}
-                <span className="text-foreground font-medium">await</span>
-                {" traza.execute(response.choices[0].message.tool_calls)"}
+                <span className="text-[#0000ff]">const</span>
+                <span className="text-[#1e1e1e]">{" traza = "}</span>
+                <span className="text-[#0000ff]">new</span>
+                <span className="text-[#267f99]">{" TrazaClient"}</span>
+                <span className="text-[#1e1e1e]">{"()\n"}</span>
+                <span className="text-[#0000ff]">const</span>
+                <span className="text-[#1e1e1e]">{" tools = "}</span>
+                <span className="text-[#0000ff]">await</span>
+                <span className="text-[#1e1e1e]">{" traza."}</span>
+                <span className="text-[#795e26]">getTools</span>
+                <span className="text-[#1e1e1e]">{"(["}</span>
+                <span className="text-[#a31515]">{"\"github\""}</span>
+                <span className="text-[#1e1e1e]">{", "}</span>
+                <span className="text-[#a31515]">{"\"linear\""}</span>
+                <span className="text-[#1e1e1e]">{", "}</span>
+                <span className="text-[#a31515]">{"\"slack\""}</span>
+                <span className="text-[#1e1e1e]">{"])\n\n"}</span>
+                <span className="text-[#6a9955]">{"// Pass to your model directly"}</span>{"\n"}
+                <span className="text-[#0000ff]">const</span>
+                <span className="text-[#1e1e1e]">{" response = "}</span>
+                <span className="text-[#0000ff]">await</span>
+                <span className="text-[#1e1e1e]">{" openai.chat.completions."}</span>
+                <span className="text-[#795e26]">create</span>
+                <span className="text-[#1e1e1e]">{"({\n  model: "}</span>
+                <span className="text-[#a31515]">{"\"gpt-4o\""}</span>
+                <span className="text-[#1e1e1e]">{",\n  messages,\n  tools,\n})\n\n"}</span>
+                <span className="text-[#6a9955]">{"// Execute the tool call"}</span>{"\n"}
+                <span className="text-[#0000ff]">await</span>
+                <span className="text-[#1e1e1e]">{" traza."}</span>
+                <span className="text-[#795e26]">execute</span>
+                <span className="text-[#1e1e1e]">{"(response.choices[0].message.tool_calls)"}</span>
               </code>
             </pre>
           </div>

@@ -48,6 +48,7 @@
 
 /* Anthropic-inspired: warm off-white bg, near-black primary */
 :root {
+  --traza-blue: #7AB2E1;
   --background: oklch(0.952 0.006 80);
   --foreground: oklch(0.13 0 0);
   --card: oklch(0.988 0.003 80);
