@@ -39,7 +39,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
       {children}
       <footer className="border-t border-border mt-auto">
         <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <Image src="/traza-icon.svg" alt="Traza Tools" width={72} height={15} />
+          <Image src="/traza-icon.svg" alt="Traza Tools" width={72} height={15} style={{ height: "auto" }} />
           <div className="flex items-center gap-5">
             {["Privacy", "Terms", "Docs", "Status"].map((item) => (
               <Link key={item} href="#" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
