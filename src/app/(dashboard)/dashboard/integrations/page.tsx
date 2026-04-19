@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import useSWR from "swr"
 import { TopBar } from "@/components/top-bar"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -94,14 +94,13 @@ export default function IntegrationsPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {Array.from({ length: 8 }).map((_, i) => (
               <Card key={i} className="bg-card border-border/50">
-                <CardContent className="p-4 flex items-start gap-3">
+                <CardHeader className="flex-row items-center gap-3">
                   <Skeleton className="w-9 h-9 rounded-lg shrink-0" />
-                  <div className="flex-1 space-y-2">
-                    <Skeleton className="h-3.5 w-24" />
-                    <Skeleton className="h-3 w-full" />
-                    <Skeleton className="h-6 w-16 mt-2" />
-                  </div>
-                </CardContent>
+                  <Skeleton className="h-3.5 w-24" />
+                </CardHeader>
+                <CardFooter>
+                  <Skeleton className="h-6 w-16 ml-auto" />
+                </CardFooter>
               </Card>
             ))}
           </div>
@@ -112,7 +111,7 @@ export default function IntegrationsPage() {
                 <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Connected · {connected.length}
                 </h2>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 [&>a]:flex">
                   {connected.map((provider) => (
                     <ProviderCard
                       key={provider.id}
@@ -173,39 +172,39 @@ function ProviderCard({
   onConnect: () => void
 }) {
   const cardContent = (
-    <CardContent className="p-4 flex items-start gap-3">
-      <ProviderIcon name={provider.name} iconUrl={provider.icon_url} className="w-9 h-9 rounded-lg text-xs" />
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-foreground truncate">{provider.name}</p>
-        <div className="mt-3 flex items-center justify-between">
-          {connected ? (
+    <>
+      <CardHeader className="flex-row items-center gap-3">
+        <ProviderIcon name={provider.name} iconUrl={provider.icon_url} className="w-9 h-9 rounded-lg text-xs shrink-0" />
+        <CardTitle className="text-sm truncate">{provider.name}</CardTitle>
+      </CardHeader>
+      <CardFooter className="justify-end">
+        {connected ? (
+          <div className="flex items-center gap-1.5">
             <Badge variant="secondary" className="text-xs font-normal text-emerald-600 bg-emerald-50 border-0">
               Connected
             </Badge>
-          ) : (
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-6 text-xs px-2.5 border-border/60 hover:border-primary/60 hover:text-primary gap-1"
-              onClick={(e) => { e.preventDefault(); onConnect() }}
-              disabled={connecting}
-            >
-              <Plus className="w-3 h-3" />
-              {connecting ? "Connecting…" : "Connect"}
-            </Button>
-          )}
-          {connected && (
             <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
-          )}
-        </div>
-      </div>
-    </CardContent>
+          </div>
+        ) : (
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-6 text-xs px-2.5 border-border/60 hover:border-primary/60 hover:text-primary gap-1"
+            onClick={(e) => { e.preventDefault(); onConnect() }}
+            disabled={connecting}
+          >
+            <Plus className="w-3 h-3" />
+            {connecting ? "Connecting…" : "Connect"}
+          </Button>
+        )}
+      </CardFooter>
+    </>
   )
 
   if (connected) {
     return (
-      <Link href={`/dashboard/integrations/${provider.id}`}>
-        <Card className="bg-card border-border hover:border-primary/30 transition-all group cursor-pointer">
+      <Link href={`/dashboard/integrations/${provider.id}`} className="flex">
+        <Card className="bg-card border-border hover:border-primary/30 transition-all group cursor-pointer flex-1">
           {cardContent}
         </Card>
       </Link>
