@@ -119,7 +119,7 @@ export default function AccountDetailPage({ params }: { params: Promise<{ id: st
         <Separator className="opacity-40" />
 
         <Tabs defaultValue="connections">
-          <TabsList className="h-8 bg-muted/40 border border-border/40">
+          <TabsList className="h-8">
             <TabsTrigger value="connections" className="text-xs h-6 gap-1.5">
               <Link2 className="w-3 h-3" />
               Connections
@@ -340,7 +340,7 @@ function TriggersTab({ accountId }: { accountId: string }) {
       {triggers.map((t: TriggerSubscription) => (
         <Card key={t.id} className="border-border/50 bg-card">
           <CardContent className="flex items-center gap-4 px-4 py-3">
-            <div className="p-1.5 rounded bg-primary/10 text-primary shrink-0">
+            <div className="p-1.5 rounded bg-foreground/8 text-foreground/60 shrink-0">
               <GitBranch className="w-3.5 h-3.5" />
             </div>
             <div className="flex-1 min-w-0">

@@ -76,7 +76,7 @@ export default function LogsPage() {
       <main className="flex-1 p-6 space-y-4 max-w-5xl w-full mx-auto">
         <div className="flex flex-col sm:flex-row gap-3">
           <Tabs value={segment} onValueChange={(v) => { setSegment(v); setSearch(""); setStatusTab("all") }}>
-            <TabsList className="h-8 bg-muted/40 border border-border/40">
+            <TabsList className="h-8">
               <TabsTrigger value="tools" className="text-xs h-6 gap-1.5">
                 <Zap className="w-3 h-3" /> Tools
               </TabsTrigger>
@@ -90,7 +90,7 @@ export default function LogsPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
             <Input
               placeholder={segment === "tools" ? "Search tool logs..." : "Search triggers..."}
-              className="pl-9 h-8 text-sm bg-muted/40 border-border/50 focus:border-border"
+              className="pl-9 h-8 text-sm"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -98,7 +98,7 @@ export default function LogsPage() {
 
           {segment === "tools" && (
             <Tabs value={statusTab} onValueChange={setStatusTab}>
-              <TabsList className="h-8 bg-muted/40 border border-border/40">
+              <TabsList className="h-8">
                 <TabsTrigger value="all" className="text-xs h-6">All</TabsTrigger>
                 <TabsTrigger value="errors" className="text-xs h-6 gap-1">
                   Errors
@@ -199,7 +199,7 @@ export default function LogsPage() {
                 <ul className="divide-y divide-border/30">
                   {filteredTriggers.map((trigger: TriggerSubscription) => (
                     <li key={trigger.id} className="flex items-center gap-3 px-4 py-3">
-                      <div className="p-1 rounded bg-primary/10 text-primary shrink-0">
+                      <div className="p-1 rounded bg-foreground/8 text-foreground/60 shrink-0">
                         <GitBranch className="w-3 h-3" />
                       </div>
                       <div className="flex-1 min-w-0">

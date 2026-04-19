@@ -80,7 +80,7 @@ export default function LandingPage() {
           variant="secondary"
           className="mb-6 font-normal text-xs px-3 py-1 border border-border gap-1.5 inline-flex items-center"
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+          <span className="w-1.5 h-1.5 rounded-full bg-foreground/40 inline-block" />
           Now in beta — 200+ integrations available
         </Badge>
 
@@ -114,37 +114,37 @@ export default function LandingPage() {
             </div>
             <pre className="px-5 py-4 text-xs font-mono leading-relaxed overflow-x-auto">
               <code>
-                <span className="text-muted-foreground">{"// Connect your stack to any AI agent"}</span>{"\n"}
-                <span className="text-primary">import</span>
+                <span className="text-foreground/50">{"// Connect your stack to any AI agent"}</span>{"\n"}
+                <span className="text-foreground font-medium">import</span>
                 {" { TrazaClient } "}
-                <span className="text-primary">from</span>
+                <span className="text-foreground font-medium">from</span>
                 {" "}
-                <span className="text-emerald-600 dark:text-emerald-400">"@traza/sdk"</span>
+                <span className="text-stone-500 dark:text-stone-400">"@traza/sdk"</span>
                 {"\n\n"}
-                <span className="text-primary">const</span>
+                <span className="text-foreground font-medium">const</span>
                 {" traza = "}
-                <span className="text-primary">new</span>
+                <span className="text-foreground font-medium">new</span>
                 {" TrazaClient()\n"}
-                <span className="text-primary">const</span>
+                <span className="text-foreground font-medium">const</span>
                 {" tools = "}
-                <span className="text-primary">await</span>
+                <span className="text-foreground font-medium">await</span>
                 {" traza.getTools(["}
-                <span className="text-emerald-600 dark:text-emerald-400">"github"</span>
+                <span className="text-stone-500 dark:text-stone-400">"github"</span>
                 {", "}
-                <span className="text-emerald-600 dark:text-emerald-400">"linear"</span>
+                <span className="text-stone-500 dark:text-stone-400">"linear"</span>
                 {", "}
-                <span className="text-emerald-600 dark:text-emerald-400">"slack"</span>
+                <span className="text-stone-500 dark:text-stone-400">"slack"</span>
                 {"])\n\n"}
-                <span className="text-muted-foreground">{"// Pass to your model directly"}</span>{"\n"}
-                <span className="text-primary">const</span>
+                <span className="text-foreground/50">{"// Pass to your model directly"}</span>{"\n"}
+                <span className="text-foreground font-medium">const</span>
                 {" response = "}
-                <span className="text-primary">await</span>
+                <span className="text-foreground font-medium">await</span>
                 {" openai.chat.completions.create({\n"}
                 {"  model: "}
-                <span className="text-emerald-600 dark:text-emerald-400">"gpt-4o"</span>
+                <span className="text-stone-500 dark:text-stone-400">"gpt-4o"</span>
                 {",\n  messages,\n  tools,\n})\n\n"}
-                <span className="text-muted-foreground">{"// Execute the tool call"}</span>{"\n"}
-                <span className="text-primary">await</span>
+                <span className="text-foreground/50">{"// Execute the tool call"}</span>{"\n"}
+                <span className="text-foreground font-medium">await</span>
                 {" traza.execute(response.choices[0].message.tool_calls)"}
               </code>
             </pre>
@@ -279,7 +279,7 @@ export default function LandingPage() {
               <ul className="space-y-2 flex-1">
                 {features.map((f) => (
                   <li key={f} className="flex items-center gap-2 text-xs text-foreground/80">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-foreground/50 shrink-0" />
                     {f}
                   </li>
                 ))}

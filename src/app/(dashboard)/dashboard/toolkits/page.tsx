@@ -51,7 +51,7 @@ export default function ToolkitsPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
           <Input
             placeholder="Search toolkits..."
-            className="pl-9 h-8 text-sm bg-muted/40 border-border/50 focus:border-border"
+            className="pl-9 h-8 text-sm bg-card border-border focus:border-foreground/30"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -60,7 +60,7 @@ export default function ToolkitsPage() {
         {isLoading ? (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {Array.from({ length: 8 }).map((_, i) => (
-              <Card key={i} className="bg-card border-border/50">
+              <Card key={i} className="bg-card">
                 <CardHeader className="flex-row items-center gap-3">
                   <Skeleton className="w-7 h-7 rounded-lg shrink-0" />
                   <Skeleton className="h-3.5 w-24" />
@@ -83,7 +83,7 @@ export default function ToolkitsPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 [&>a]:flex">
             {filtered.map((provider: ProviderSummary) => (
               <Link key={provider.id} href={`/dashboard/toolkits/${provider.id}`} className="flex">
-                <Card className="bg-card border-border hover:border-primary/30 transition-all group cursor-pointer flex-1">
+                <Card className="bg-card border-border hover:border-foreground/25 hover:shadow-sm transition-all group cursor-pointer flex-1">
                   <CardHeader className="flex-row items-center gap-3">
                     <ProviderIcon
                       name={provider.name}

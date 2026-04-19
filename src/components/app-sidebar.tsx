@@ -22,14 +22,12 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarSeparator,
 } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
@@ -73,8 +71,6 @@ export function AppSidebar() {
         </Link>
       </SidebarHeader>
 
-      <SidebarSeparator className="opacity-40" />
-
       <SidebarContent className="px-2 py-3">
         <SidebarGroup>
           <SidebarGroupContent>
@@ -84,15 +80,14 @@ export function AppSidebar() {
                 return (
                   <SidebarMenuItem key={href}>
                     <SidebarMenuButton
-                      isActive={active}
                       render={
                         <Link
                           href={href}
                           className={cn(
                             "flex items-center gap-2.5 text-sm font-medium rounded-md px-2.5 py-2 transition-colors w-full",
                             active
-                              ? "text-foreground bg-sidebar-accent"
-                              : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50"
+                              ? "text-foreground bg-card border border-border/60 hover:bg-card hover:text-foreground"
+                              : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/60"
                           )}
                         >
                           <Icon className="w-4 h-4 shrink-0" />
@@ -107,8 +102,6 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarSeparator className="my-2 opacity-40" />
-
         <SidebarGroup>
           <SidebarGroupLabel className="text-xs text-muted-foreground/60 uppercase tracking-widest px-2.5 mb-1">
             Account
@@ -120,15 +113,14 @@ export function AppSidebar() {
                 return (
                   <SidebarMenuItem key={href}>
                     <SidebarMenuButton
-                      isActive={active}
                       render={
                         <Link
                           href={href}
                           className={cn(
                             "flex items-center gap-2.5 text-sm font-medium rounded-md px-2.5 py-2 transition-colors w-full",
                             active
-                              ? "text-foreground bg-sidebar-accent"
-                              : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50"
+                              ? "text-foreground bg-card border border-border/60 hover:bg-card hover:text-foreground"
+                              : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/60"
                           )}
                         >
                           <Icon className="w-4 h-4 shrink-0" />
@@ -151,7 +143,7 @@ export function AppSidebar() {
             render={
               <div className="flex items-center gap-2.5 w-full px-2 py-2 rounded-md hover:bg-sidebar-accent/50 transition-colors cursor-pointer group">
                 <Avatar className="w-7 h-7 shrink-0">
-                  <AvatarFallback className="text-xs bg-primary/20 text-primary font-semibold">
+                  <AvatarFallback className="text-xs bg-foreground/10 text-foreground/70 font-semibold">
                     {initials}
                   </AvatarFallback>
                 </Avatar>

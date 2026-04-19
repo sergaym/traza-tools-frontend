@@ -132,7 +132,7 @@ export default function SettingsPage() {
               <Input
                 value={workspaceName}
                 onChange={(e) => setWorkspaceName(e.target.value)}
-                className="h-8 text-sm bg-muted/40 border-border max-w-xs"
+                className="h-8 text-sm max-w-xs"
               />
             </div>
             <div className="space-y-1.5">
@@ -140,7 +140,7 @@ export default function SettingsPage() {
               <Input
                 readOnly
                 value={API_BASE || "(not set)"}
-                className="h-8 text-sm bg-muted/40 border-border max-w-xs"
+                className="h-8 text-sm max-w-xs"
               />
             </div>
             <Button size="sm" className="h-8 text-xs" type="button" onClick={() => void handleSaveWorkspace()}>
