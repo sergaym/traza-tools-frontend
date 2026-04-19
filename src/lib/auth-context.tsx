@@ -7,7 +7,9 @@ import {
   useEffect,
   useState,
 } from "react"
-import { apiClient } from "@/lib/api-client"
+
+import { authClient } from "@/lib/auth-client"
+import { apiClient, clearTrazaTokenCache } from "@/lib/api-client"
 
 export interface AuthUser {
   id: string
@@ -23,55 +25,86 @@ interface AuthState {
   login: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
   refreshUser: () => Promise<void>
+  needsWorkspace: boolean
 }
 
 const AuthContext = createContext<AuthState | undefined>(undefined)
 
+function sessionOrgId(session: { user: unknown } | null): string | null {
+  if (!session) return null
+  const id = (session.user as { organizationId?: string | null }).organizationId
+  return id ?? null
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const { data: session, isPending: sessionPending } = authClient.useSession()
   const [user, setUser] = useState<AuthUser | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [meLoading, setMeLoading] = useState(true)
+
+  const needsWorkspace = !!session && !sessionOrgId(session)
+
+  useEffect(() => {
+    if (sessionPending) return
+    if (!session) {
+      setUser(null)
+      setMeLoading(false)
+      return
+    }
+    if (!sessionOrgId(session)) {
+      setUser(null)
+      setMeLoading(false)
+      return
+    }
+    setMeLoading(true)
+    clearTrazaTokenCache()
+    apiClient
+      .get<AuthUser>("/v1/auth/me")
+      .then(setUser)
+      .catch(() => setUser(null))
+      .finally(() => setMeLoading(false))
+  }, [session, sessionPending])
 
   const refreshUser = useCallback(async () => {
+    clearTrazaTokenCache()
+    if (!session || !sessionOrgId(session)) {
+      setUser(null)
+      return
+    }
     try {
       const me = await apiClient.get<AuthUser>("/v1/auth/me")
       setUser(me)
     } catch {
       setUser(null)
     }
-  }, [])
-
-  useEffect(() => {
-    apiClient
-      .get<AuthUser>("/v1/auth/me")
-      .then(setUser)
-      .catch(() => setUser(null))
-      .finally(() => setIsLoading(false))
-  }, [])
+  }, [session])
 
   const login = useCallback(async (email: string, password: string) => {
-    await apiClient.post("/v1/auth/login", { email, password })
-    const me = await apiClient.get<AuthUser>("/v1/auth/me")
-    setUser(me)
+    const { error } = await authClient.signIn.email({ email, password })
+    if (error) {
+      throw new Error(error.message ?? "Sign in failed")
+    }
+    clearTrazaTokenCache()
   }, [])
 
   const logout = useCallback(async () => {
-    try {
-      await apiClient.post("/v1/auth/logout")
-    } catch {
-      // ignore
-    }
+    clearTrazaTokenCache()
+    await authClient.signOut()
     setUser(null)
   }, [])
+
+  const isLoading = sessionPending || (!!session && !!sessionOrgId(session) && meLoading)
+  const isAuthenticated = !!session && !!sessionOrgId(session) && !!user
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated: !!user,
+        isAuthenticated,
         isLoading,
         login,
         logout,
         refreshUser,
+        needsWorkspace,
       }}
     >
       {children}

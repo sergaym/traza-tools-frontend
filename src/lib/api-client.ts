@@ -7,6 +7,43 @@ type RequestOptions = {
   params?: Record<string, string | number | boolean | undefined>
 }
 
+let cachedToken: { token: string; expMs: number } | null = null
+
+function jwtExpMs(token: string): number {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1])) as { exp?: number }
+    return payload.exp ? payload.exp * 1000 : 0
+  } catch {
+    return 0
+  }
+}
+
+export function clearTrazaTokenCache() {
+  cachedToken = null
+}
+
+async function getTrazaBearerToken(): Promise<string | null> {
+  if (typeof window === "undefined") {
+    return null
+  }
+  const now = Date.now()
+  if (cachedToken && cachedToken.expMs > now + 30_000) {
+    return cachedToken.token
+  }
+  const r = await fetch(`${window.location.origin}/api/traza/token`, { credentials: "include" })
+  if (!r.ok) {
+    cachedToken = null
+    return null
+  }
+  const { token } = (await r.json()) as { token: string }
+  const expMs = jwtExpMs(token)
+  cachedToken = {
+    token,
+    expMs: expMs || now + 14 * 60 * 1000,
+  }
+  return token
+}
+
 async function request<T>(
   method: string,
   path: string,
@@ -21,12 +58,21 @@ async function request<T>(
     }
   }
 
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...options.headers,
+  }
+
+  if (typeof window !== "undefined") {
+    const t = await getTrazaBearerToken()
+    if (t) {
+      headers.Authorization = `Bearer ${t}`
+    }
+  }
+
   const response = await fetch(url.toString(), {
     method,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
+    headers,
     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
     credentials: "include",
   })

@@ -36,8 +36,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="w-full max-w-sm">
-      <div className="mb-8">
+    <div className="w-full">
+      <div className="mb-6">
         <h1 className="text-xl font-semibold text-foreground tracking-tight">Sign in</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Use your workspace account to access the dashboard

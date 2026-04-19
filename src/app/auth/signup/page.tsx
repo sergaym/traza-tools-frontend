@@ -6,14 +6,12 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useAuth } from "@/lib/auth-context"
-import { organizationsService } from "@/modules/organizations/services/organizations-service"
+import { authClient } from "@/lib/auth-client"
 import { CheckCircle2, Copy } from "lucide-react"
 
 type Step = "form" | "done"
 
 export default function SignupPage() {
-  const { login } = useAuth()
   const router = useRouter()
   const [orgName, setOrgName] = useState("")
   const [name, setName] = useState("")
@@ -35,20 +33,35 @@ export default function SignupPage() {
     setError("")
     setLoading(true)
     try {
-      const res = await organizationsService.signup({
-        org_name: on,
-        name: nm,
+      const { error: signErr } = await authClient.signUp.email({
         email: em,
         password,
+        name: nm,
       })
-      setApiKey(res.api_key.key)
+      if (signErr) {
+        setError(signErr.message ?? "Could not create account")
+        return
+      }
+
+      const res = await fetch("/api/onboarding/organization", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ org_name: on }),
+      })
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { error?: string; detail?: string }
+        setError(body.detail ?? body.error ?? "Could not create workspace")
+        return
+      }
+
+      const data = (await res.json()) as {
+        api_key: { key: string }
+      }
+      setApiKey(data.api_key.key)
       setStep("done")
-    } catch (err: unknown) {
-      const msg =
-        err && typeof err === "object" && "message" in err && typeof (err as { message: string }).message === "string"
-          ? (err as { message: string }).message
-          : "Something went wrong"
-      setError(msg)
+    } catch {
+      setError("Something went wrong")
     } finally {
       setLoading(false)
     }
@@ -60,10 +73,9 @@ export default function SignupPage() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  async function handleContinue() {
-    const em = email.trim()
-    await login(em, password)
+  function handleContinue() {
     router.push("/dashboard")
+    router.refresh()
   }
 
   if (step === "done") {
@@ -103,10 +115,10 @@ export default function SignupPage() {
           </div>
 
           <p className="text-xs text-muted-foreground px-0.5">
-            Dashboard access uses your email and password. Use this key for API and integrations.
+            You&apos;re signed in with Better Auth. Use this key for the Traza API and integrations.
           </p>
 
-          <Button className="w-full" onClick={() => void handleContinue()}>
+          <Button className="w-full" onClick={handleContinue}>
             Go to dashboard
           </Button>
         </div>
@@ -119,7 +131,7 @@ export default function SignupPage() {
       <div className="mb-8">
         <h1 className="text-xl font-semibold text-foreground tracking-tight">Create workspace</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          One account for the dashboard; you&apos;ll get an API key for automation.
+          Better Auth handles your account; we link it to a Traza organization and API key.
         </p>
       </div>
 

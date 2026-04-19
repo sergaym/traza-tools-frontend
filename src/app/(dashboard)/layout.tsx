@@ -7,16 +7,21 @@ import { AppSidebar } from "@/components/app-sidebar"
 import { useAuth } from "@/lib/auth-context"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth()
+  const { isAuthenticated, isLoading, needsWorkspace } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (isLoading) return
+    if (needsWorkspace) {
+      router.replace("/auth/onboarding")
+      return
+    }
+    if (!isAuthenticated) {
       router.replace("/auth/login")
     }
-  }, [isAuthenticated, isLoading, router])
+  }, [isAuthenticated, isLoading, needsWorkspace, router])
 
-  if (isLoading || !isAuthenticated) return null
+  if (isLoading || needsWorkspace || !isAuthenticated) return null
 
   return (
     <SidebarProvider>

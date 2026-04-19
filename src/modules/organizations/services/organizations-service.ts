@@ -9,15 +9,6 @@ import type {
 class OrganizationsService {
   private readonly basePath = "/v1/organizations"
 
-  async signup(body: {
-    org_name: string
-    name: string
-    email: string
-    password: string
-  }): Promise<CreateOrganizationResponse> {
-    return apiClient.post<CreateOrganizationResponse>(`${this.basePath}/signup`, body)
-  }
-
   async create(name: string): Promise<CreateOrganizationResponse> {
     return apiClient.post<CreateOrganizationResponse>(`${this.basePath}/`, { name })
   }
