@@ -19,6 +19,7 @@ export interface ToolDetail {
 
 export interface ExecutionLog {
   id: string
+  user_id: string
   provider_id: string
   tool_id: string
   connection_id: string | null

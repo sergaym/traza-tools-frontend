@@ -18,13 +18,15 @@ class ToolsService {
   }
 
   async getLogs(
-    userId: string,
-    params?: { provider_id?: string; tool_id?: string; limit?: number; offset?: number }
+    params?: {
+      user_id?: string
+      provider_id?: string
+      tool_id?: string
+      limit?: number
+      offset?: number
+    }
   ): Promise<ExecutionLog[]> {
-    return apiClient.get<ExecutionLog[]>(`${this.basePath}/logs`, {
-      user_id: userId,
-      ...params,
-    })
+    return apiClient.get<ExecutionLog[]>(`${this.basePath}/logs`, params)
   }
 
   async getLogById(logId: string): Promise<ExecutionLogDetail> {

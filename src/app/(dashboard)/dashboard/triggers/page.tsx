@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import useSWR from "swr"
 import { TopBar } from "@/components/top-bar"
 import { Card, CardContent } from "@/components/ui/card"
@@ -10,12 +11,14 @@ import { triggersService } from "@/modules/triggers/services/triggers-service"
 import type { TriggerSubscription } from "@/modules/triggers/types"
 import { toast } from "sonner"
 
-const TRAZA_USER_ID = process.env.NEXT_PUBLIC_TRAZA_USER_ID ?? ""
+function shortAccountId(id: string) {
+  return `${id.slice(0, 8)}…${id.slice(-4)}`
+}
 
 export default function TriggersPage() {
   const { data: triggers, isLoading } = useSWR(
-    TRAZA_USER_ID ? ["/v1/triggers", TRAZA_USER_ID] : null,
-    () => triggersService.getAll(TRAZA_USER_ID),
+    "/v1/triggers",
+    () => triggersService.getAll(),
     { onError: () => toast.error("Failed to load triggers") }
   )
 
@@ -53,17 +56,21 @@ export default function TriggersPage() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground">{trigger.trigger_id}</p>
                     <p className="text-xs text-muted-foreground">{trigger.provider_id}</p>
+                    <Link
+                      href={`/dashboard/accounts/${trigger.user_id}`}
+                      className="text-xs font-mono text-muted-foreground hover:text-foreground hover:underline mt-0.5 inline-block"
+                    >
+                      {shortAccountId(trigger.user_id)}
+                    </Link>
                   </div>
                   <div className="flex items-center gap-4 shrink-0">
                     <div className="text-right hidden sm:block">
                       <p className="text-xs text-muted-foreground">Callback</p>
                       <code className="text-xs font-mono text-foreground truncate max-w-[200px] block">{trigger.callback_url}</code>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <Badge className={`text-xs font-normal border-0 ${trigger.status === "active" ? "text-emerald-600 bg-emerald-50" : "text-muted-foreground bg-muted"}`}>
-                        {trigger.status}
-                      </Badge>
-                    </div>
+                    <Badge className={`text-xs font-normal border-0 ${trigger.status === "active" ? "text-emerald-600 bg-emerald-50" : "text-muted-foreground bg-muted"}`}>
+                      {trigger.status}
+                    </Badge>
                   </div>
                 </CardContent>
               </Card>

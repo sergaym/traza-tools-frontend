@@ -5,6 +5,8 @@ export interface Connection {
   status: string
   created_at: string | null
   updated_at: string | null
+  provider_name?: string | null
+  provider_icon_url?: string | null
 }
 
 export interface CreateConnectionRequest {

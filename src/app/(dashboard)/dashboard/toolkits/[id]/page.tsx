@@ -2,7 +2,7 @@
 
 import { use } from "react"
 import Link from "next/link"
-import useSWR, { useSWRConfig } from "swr"
+import useSWR from "swr"
 import { TopBar } from "@/components/top-bar"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -12,59 +12,33 @@ import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ChevronLeft, Zap, GitBranch, Activity } from "lucide-react"
 import { providersService } from "@/modules/providers/services/providers-service"
-import { toolsService } from "@/modules/tools/services/tools-service"
-import { connectionsService } from "@/modules/connections/services/connections-service"
-import { triggersService } from "@/modules/triggers/services/triggers-service"
 import { ProviderIcon } from "@/modules/providers/components/provider-icon"
-import type { ToolSummary } from "@/modules/tools/types"
-import type { TriggerSubscription } from "@/modules/triggers/types"
-import type { Connection } from "@/modules/connections/types"
+import type { ProviderToolItem } from "@/modules/providers/types"
 import { toast } from "sonner"
 
-const TRAZA_USER_ID = process.env.NEXT_PUBLIC_TRAZA_USER_ID ?? ""
-
-export default function IntegrationDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default function ToolkitDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
-  const { mutate } = useSWRConfig()
 
   const { data: provider, isLoading: loadingProvider } = useSWR(
     `/v1/providers/${id}`,
     () => providersService.getById(id),
-    { onError: () => toast.error("Failed to load provider") }
+    { onError: () => toast.error("Failed to load toolkit") }
   )
 
   const { data: toolsPage, isLoading: loadingTools } = useSWR(
-    `/v1/tools?provider_id=${id}`,
-    () => toolsService.getAll({ limit: 100 }),
+    `/v1/providers/${id}/tools`,
+    () => providersService.getTools(id, { limit: 100 }),
     { onError: () => toast.error("Failed to load tools") }
   )
 
-  const { data: allConnections, isLoading: loadingConnections } = useSWR(
-    TRAZA_USER_ID ? ["/v1/connections", TRAZA_USER_ID] : null,
-    () => connectionsService.getAll(TRAZA_USER_ID),
-    { onError: () => toast.error("Failed to load connections") }
-  )
-
-  const { data: allTriggers, isLoading: loadingTriggers } = useSWR(
-    TRAZA_USER_ID ? ["/v1/triggers", TRAZA_USER_ID] : null,
-    () => triggersService.getAll(TRAZA_USER_ID),
+  const { data: triggersPage, isLoading: loadingTriggers } = useSWR(
+    `/v1/providers/${id}/triggers`,
+    () => providersService.getTriggers(id, { limit: 100 }),
     { onError: () => toast.error("Failed to load triggers") }
   )
 
-  const tools = (toolsPage?.data ?? []).filter((t: ToolSummary) => t.provider_id === id)
-  const connection = (allConnections ?? []).find((c: Connection) => c.provider_id === id)
-  const triggers = (allTriggers ?? []).filter((t: TriggerSubscription) => t.provider_id === id)
-
-  async function handleDisconnect() {
-    if (!connection) return
-    try {
-      await connectionsService.delete(connection.id, TRAZA_USER_ID)
-      await mutate(TRAZA_USER_ID ? ["/v1/connections", TRAZA_USER_ID] : null)
-      toast.success("Disconnected")
-    } catch {
-      toast.error("Failed to disconnect")
-    }
-  }
+  const tools = toolsPage?.data ?? []
+  const triggers = triggersPage?.data ?? []
 
   if (loadingProvider) {
     return (
@@ -86,9 +60,9 @@ export default function IntegrationDetailPage({ params }: { params: Promise<{ id
   if (!provider) {
     return (
       <div className="flex flex-col items-center justify-center flex-1 gap-3 text-center p-10">
-        <p className="text-sm text-muted-foreground">Provider not found</p>
-        <Button variant="outline" size="sm" render={<Link href="/dashboard/integrations" />} nativeButton={false}>
-          Back to integrations
+        <p className="text-sm text-muted-foreground">Toolkit not found</p>
+        <Button variant="outline" size="sm" render={<Link href="/dashboard/toolkits" />} nativeButton={false}>
+          Back to toolkits
         </Button>
       </div>
     )
@@ -99,14 +73,13 @@ export default function IntegrationDetailPage({ params }: { params: Promise<{ id
       <TopBar
         title={
           <span className="flex items-center gap-1.5">
-            <Link href="/dashboard/integrations" className="text-muted-foreground hover:text-foreground transition-colors">
-              Integrations
+            <Link href="/dashboard/toolkits" className="text-muted-foreground hover:text-foreground transition-colors">
+              Toolkits
             </Link>
             <ChevronLeft className="w-3 h-3 text-muted-foreground rotate-180" />
             <span>{provider.name}</span>
           </span>
         }
-        badge={connection ? "Connected" : "Not connected"}
       />
       <main className="flex-1 p-6 space-y-5 max-w-4xl w-full mx-auto">
         <div className="flex items-center gap-4">
@@ -117,16 +90,6 @@ export default function IntegrationDetailPage({ params }: { params: Promise<{ id
               {provider.tool_count} tool{provider.tool_count !== 1 ? "s" : ""} · {provider.trigger_count} trigger{provider.trigger_count !== 1 ? "s" : ""}
             </p>
           </div>
-          {connection && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 text-xs border-border/60 text-destructive hover:text-destructive hover:border-destructive/40"
-              onClick={handleDisconnect}
-            >
-              Disconnect
-            </Button>
-          )}
         </div>
 
         <Separator className="opacity-40" />
@@ -146,10 +109,10 @@ export default function IntegrationDetailPage({ params }: { params: Promise<{ id
           </TabsList>
 
           <TabsContent value="tools" className="mt-4">
-            <ToolsPanel tools={tools} loading={loadingTools} />
+            <CatalogToolsPanel tools={tools} loading={loadingTools} />
           </TabsContent>
           <TabsContent value="triggers" className="mt-4">
-            <TriggersPanel triggers={triggers} loading={loadingTriggers} />
+            <CatalogTriggersPanel triggers={triggers} loading={loadingTriggers} />
           </TabsContent>
         </Tabs>
       </main>
@@ -157,7 +120,7 @@ export default function IntegrationDetailPage({ params }: { params: Promise<{ id
   )
 }
 
-function ToolsPanel({ tools, loading }: { tools: ToolSummary[]; loading: boolean }) {
+function CatalogToolsPanel({ tools, loading }: { tools: ProviderToolItem[]; loading: boolean }) {
   if (loading) {
     return (
       <Card className="bg-card border-border/50">
@@ -182,7 +145,7 @@ function ToolsPanel({ tools, loading }: { tools: ToolSummary[]; loading: boolean
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
         <Zap className="w-7 h-7 text-muted-foreground/30" />
-        <p className="text-sm text-muted-foreground">No tools available</p>
+        <p className="text-sm text-muted-foreground">No tools in this toolkit</p>
       </div>
     )
   }
@@ -197,8 +160,8 @@ function ToolsPanel({ tools, loading }: { tools: ToolSummary[]; loading: boolean
                 <Zap className="w-3 h-3" />
               </div>
               <div className="flex-1 min-w-0">
-                <code className="text-xs font-mono text-foreground">{tool.tool_id}</code>
-                <p className="text-xs text-muted-foreground">v{tool.version}</p>
+                <p className="text-sm font-medium text-foreground">{tool.name}</p>
+                <code className="text-xs font-mono text-muted-foreground">{tool.tool_id}</code>
               </div>
               <Badge variant="secondary" className="text-xs font-normal shrink-0">
                 {tool.tool_slug}
@@ -211,7 +174,7 @@ function ToolsPanel({ tools, loading }: { tools: ToolSummary[]; loading: boolean
   )
 }
 
-function TriggersPanel({ triggers, loading }: { triggers: TriggerSubscription[]; loading: boolean }) {
+function CatalogTriggersPanel({ triggers, loading }: { triggers: ProviderToolItem[]; loading: boolean }) {
   if (loading) {
     return (
       <div className="space-y-2">
@@ -234,28 +197,26 @@ function TriggersPanel({ triggers, loading }: { triggers: TriggerSubscription[];
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
         <Activity className="w-7 h-7 text-muted-foreground/30" />
-        <p className="text-sm text-muted-foreground">No active trigger subscriptions</p>
+        <p className="text-sm text-muted-foreground">No triggers in this toolkit</p>
       </div>
     )
   }
 
   return (
     <div className="space-y-2">
-      {triggers.map((trigger) => (
-        <Card key={trigger.id} className="bg-card border-border/50 hover:border-border transition-colors">
+      {triggers.map((t) => (
+        <Card key={t.tool_slug} className="bg-card border-border/50 hover:border-border transition-colors">
           <CardContent className="flex items-center gap-4 px-4 py-3">
             <div className="p-1.5 rounded bg-primary/10 text-primary shrink-0">
               <GitBranch className="w-3.5 h-3.5" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground">{trigger.trigger_id}</p>
-              <code className="text-xs font-mono text-muted-foreground truncate">{trigger.callback_url}</code>
+              <p className="text-sm font-medium text-foreground">{t.name}</p>
+              <code className="text-xs font-mono text-muted-foreground">{t.tool_id}</code>
             </div>
-            <div className="flex items-center gap-1.5 shrink-0">
-              <Badge className={`text-xs font-normal border-0 ${trigger.status === "active" ? "text-emerald-600 bg-emerald-50" : "text-muted-foreground bg-muted"}`}>
-                {trigger.status}
-              </Badge>
-            </div>
+            <Badge variant="secondary" className="text-xs font-normal shrink-0">
+              {t.tool_slug}
+            </Badge>
           </CardContent>
         </Card>
       ))}

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import useSWR from "swr"
 import { TopBar } from "@/components/top-bar"
 import { Badge } from "@/components/ui/badge"
@@ -15,8 +16,6 @@ import { toolsService } from "@/modules/tools/services/tools-service"
 import type { ExecutionLog } from "@/modules/tools/types"
 import { toast } from "sonner"
 
-const TRAZA_USER_ID = process.env.NEXT_PUBLIC_TRAZA_USER_ID ?? ""
-
 type LogStatus = "success" | "error" | "running"
 
 const STATUS_CONFIG: Record<string, { icon: typeof CheckCircle2; className: string }> = {
@@ -25,20 +24,25 @@ const STATUS_CONFIG: Record<string, { icon: typeof CheckCircle2; className: stri
   running: { icon: Clock, className: "text-amber-400 animate-pulse" },
 }
 
+function shortAccountId(id: string) {
+  return `${id.slice(0, 8)}…${id.slice(-4)}`
+}
+
 export default function LogsPage() {
   const [search, setSearch] = useState("")
   const [tab, setTab] = useState("all")
 
   const { data: logs, isLoading } = useSWR(
-    TRAZA_USER_ID ? ["/v1/tools/logs", TRAZA_USER_ID] : null,
-    () => toolsService.getLogs(TRAZA_USER_ID),
+    "/v1/tools/logs",
+    () => toolsService.getLogs({ limit: 200 }),
     { onError: () => toast.error("Failed to load logs") }
   )
 
   const filtered = (logs ?? []).filter((entry: ExecutionLog) => {
     const matchesSearch =
       entry.tool_id.toLowerCase().includes(search.toLowerCase()) ||
-      entry.provider_id.toLowerCase().includes(search.toLowerCase())
+      entry.provider_id.toLowerCase().includes(search.toLowerCase()) ||
+      entry.user_id.toLowerCase().includes(search.toLowerCase())
     const matchesTab =
       tab === "all" || (tab === "errors" && entry.status === "error")
     return matchesSearch && matchesTab
@@ -102,34 +106,42 @@ export default function LogsPage() {
                 const config = STATUS_CONFIG[entry.status as LogStatus] ?? STATUS_CONFIG.running
                 const { icon: StatusIcon, className: statusClass } = config
                 return (
-                  <li key={entry.id} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/20 transition-colors">
-                    <StatusIcon className={cn("w-3.5 h-3.5 shrink-0", statusClass)} />
-                    <div className="p-1 rounded bg-muted/50 text-muted-foreground shrink-0">
-                      <Zap className="w-3 h-3" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <code className="text-xs font-mono text-foreground">{entry.tool_id}</code>
-                        <Badge variant="secondary" className="text-xs font-normal h-4 px-1.5 shrink-0">
-                          {entry.provider_id}
-                        </Badge>
+                  <li key={entry.id}>
+                    <Link
+                      href={`/dashboard/logs/${entry.id}`}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-muted/20 transition-colors"
+                    >
+                      <StatusIcon className={cn("w-3.5 h-3.5 shrink-0", statusClass)} />
+                      <div className="p-1 rounded bg-muted/50 text-muted-foreground shrink-0">
+                        <Zap className="w-3 h-3" />
                       </div>
-                      {entry.error && (
-                        <p className="text-xs text-red-400/80 truncate mt-0.5">{entry.error}</p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-4 shrink-0">
-                      {entry.duration_ms !== null && (
-                        <span className="text-xs text-muted-foreground hidden sm:block">
-                          {entry.duration_ms}ms
-                        </span>
-                      )}
-                      {entry.created_at && (
-                        <span className="text-xs text-muted-foreground">
-                          {new Date(entry.created_at).toLocaleTimeString()}
-                        </span>
-                      )}
-                    </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <code className="text-xs font-mono text-foreground">{entry.tool_id}</code>
+                          <Badge variant="secondary" className="text-xs font-normal h-4 px-1.5 shrink-0">
+                            {entry.provider_id}
+                          </Badge>
+                          <span className="text-xs font-mono text-muted-foreground" title={entry.user_id}>
+                            {shortAccountId(entry.user_id)}
+                          </span>
+                        </div>
+                        {entry.error && (
+                          <p className="text-xs text-red-400/80 truncate mt-0.5">{entry.error}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-4 shrink-0">
+                        {entry.duration_ms !== null && (
+                          <span className="text-xs text-muted-foreground hidden sm:block">
+                            {entry.duration_ms}ms
+                          </span>
+                        )}
+                        {entry.created_at && (
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(entry.created_at).toLocaleTimeString()}
+                          </span>
+                        )}
+                      </div>
+                    </Link>
                   </li>
                 )
               })}

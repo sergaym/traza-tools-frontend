@@ -8,11 +8,8 @@ class TriggersService {
     return apiClient.post<TriggerSubscription>(`${this.basePath}/subscribe`, data)
   }
 
-  async getAll(userId: string, params?: { provider_id?: string }): Promise<TriggerSubscription[]> {
-    return apiClient.get<TriggerSubscription[]>(`${this.basePath}/`, {
-      user_id: userId,
-      ...params,
-    })
+  async getAll(params?: { user_id?: string; provider_id?: string }): Promise<TriggerSubscription[]> {
+    return apiClient.get<TriggerSubscription[]>(`${this.basePath}/`, params)
   }
 
   async getById(subscriptionId: string): Promise<TriggerSubscription> {

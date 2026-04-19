@@ -10,6 +10,7 @@ import {
   ChevronDown,
   Zap,
   GitBranch,
+  Users,
 } from "lucide-react"
 import {
   Sidebar,
@@ -36,7 +37,8 @@ import { cn } from "@/lib/utils"
 import { useAuth } from "@/lib/auth-context"
 
 const mainNav = [
-  { label: "Integrations", href: "/dashboard/integrations", icon: Puzzle },
+  { label: "Toolkits", href: "/dashboard/toolkits", icon: Puzzle },
+  { label: "Accounts", href: "/dashboard/accounts", icon: Users },
   { label: "Logs", href: "/dashboard/logs", icon: ScrollText },
   { label: "Triggers", href: "/dashboard/triggers", icon: GitBranch },
 ]
