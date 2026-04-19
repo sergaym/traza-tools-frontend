@@ -8,7 +8,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
       <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center">
-            <Image src="/traza-icon.svg" alt="Traza Tools" width={90} height={18} priority />
+            <Image src="/traza-icon.svg" alt="Traza Tools" width={90} height={18} style={{ height: "auto" }} priority />
           </Link>
           <nav className="hidden md:flex items-center gap-6">
             {[
