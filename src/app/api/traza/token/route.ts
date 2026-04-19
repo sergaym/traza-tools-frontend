@@ -2,14 +2,13 @@ import { SignJWT } from "jose"
 import { headers } from "next/headers"
 import { NextResponse } from "next/server"
 
-import { auth } from "@/lib/auth"
+import { auth, pool } from "@/lib/auth"
 
 async function provisionOrg(
   userId: string,
   userName: string,
   apiUrl: string,
   bootstrapKey: string,
-  sessionHeaders: Headers,
 ): Promise<string | null> {
   const res = await fetch(`${apiUrl}/v1/organizations/`, {
     method: "POST",
@@ -21,17 +20,7 @@ async function provisionOrg(
   const data = (await res.json()) as { organization: { id: string } }
   const orgId = data.organization.id
 
-  const host = sessionHeaders.get("x-forwarded-host") ?? sessionHeaders.get("host") ?? "localhost:3000"
-  const proto = sessionHeaders.get("x-forwarded-proto") ?? "http"
-
-  await fetch(`${proto}://${host}/api/auth/update-user`, {
-    method: "POST",
-    headers: {
-      cookie: sessionHeaders.get("cookie") ?? "",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ organizationId: orgId }),
-  })
+  await pool.query(`UPDATE "user" SET "organizationId" = $1 WHERE id = $2`, [orgId, userId])
 
   return orgId
 }
@@ -53,7 +42,7 @@ export async function GET() {
   let orgId = (session.user as { organizationId?: string | null }).organizationId ?? null
 
   if (!orgId) {
-    orgId = await provisionOrg(session.user.id, session.user.name, apiUrl, bootstrapKey, h)
+    orgId = await provisionOrg(session.user.id, session.user.name, apiUrl, bootstrapKey)
     if (!orgId) {
       return NextResponse.json({ error: "workspace_creation_failed" }, { status: 502 })
     }

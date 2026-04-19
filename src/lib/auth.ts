@@ -6,7 +6,7 @@ import { nodePostgresUrl } from "@/lib/db-url"
 
 const connectionString = nodePostgresUrl(process.env.DATABASE_URL)
 
-const pool = new Pool({
+export const pool = new Pool({
   connectionString,
   max: 10,
 })
