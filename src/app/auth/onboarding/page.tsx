@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { authClient } from "@/lib/auth-client"
 import { useAuth } from "@/lib/auth-context"
@@ -84,7 +83,7 @@ export default function OnboardingPage() {
       <p className="mt-6 text-center text-xs text-muted-foreground">
         <Button
           type="button"
-          className="text-foreground hover:underline underline-offset-4"
+          className="text-white hover:underline underline-offset-4"
           onClick={async () => {
             await authClient.signOut()
             router.push("/auth/login")

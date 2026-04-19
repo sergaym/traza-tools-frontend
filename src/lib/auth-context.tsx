@@ -25,32 +25,18 @@ interface AuthState {
   login: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
   refreshUser: () => Promise<void>
-  needsWorkspace: boolean
 }
 
 const AuthContext = createContext<AuthState | undefined>(undefined)
-
-function sessionOrgId(session: { user: unknown } | null): string | null {
-  if (!session) return null
-  const id = (session.user as { organizationId?: string | null }).organizationId
-  return id ?? null
-}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { data: session, isPending: sessionPending } = authClient.useSession()
   const [user, setUser] = useState<AuthUser | null>(null)
   const [meLoading, setMeLoading] = useState(true)
 
-  const needsWorkspace = !!session && !sessionOrgId(session)
-
   useEffect(() => {
     if (sessionPending) return
     if (!session) {
-      setUser(null)
-      setMeLoading(false)
-      return
-    }
-    if (!sessionOrgId(session)) {
       setUser(null)
       setMeLoading(false)
       return
@@ -66,7 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refreshUser = useCallback(async () => {
     clearTrazaTokenCache()
-    if (!session || !sessionOrgId(session)) {
+    if (!session) {
       setUser(null)
       return
     }
@@ -92,8 +78,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null)
   }, [])
 
-  const isLoading = sessionPending || (!!session && !!sessionOrgId(session) && meLoading)
-  const isAuthenticated = !!session && !!sessionOrgId(session) && !!user
+  const isLoading = sessionPending || (!!session && meLoading)
+  const isAuthenticated = !!session && !!user
 
   return (
     <AuthContext.Provider
@@ -104,7 +90,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         logout,
         refreshUser,
-        needsWorkspace,
       }}
     >
       {children}
