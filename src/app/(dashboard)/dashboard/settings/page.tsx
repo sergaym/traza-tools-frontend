@@ -118,7 +118,7 @@ export default function SettingsPage() {
 
   return (
     <>
-      <TopBar title="Settings" description="Workspace configuration" />
+      <TopBar title="Settings" />
       <main className="flex-1 p-6 space-y-5 max-w-2xl w-full">
         <Card className="bg-card border-border">
           <CardHeader className="pb-3">

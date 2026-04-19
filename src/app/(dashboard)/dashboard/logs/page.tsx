@@ -47,11 +47,7 @@ export default function LogsPage() {
 
   return (
     <>
-      <TopBar
-        title="Logs"
-        badge={isLoading ? undefined : `${logs?.length ?? 0} entries`}
-        description="Tool execution history"
-      />
+      <TopBar title="Logs" />
       <main className="flex-1 p-6 space-y-4 max-w-5xl w-full mx-auto">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1 max-w-xs">

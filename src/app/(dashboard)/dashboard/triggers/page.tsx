@@ -20,11 +20,7 @@ export default function TriggersPage() {
 
   return (
     <>
-      <TopBar
-        title="Triggers"
-        badge={isLoading ? undefined : `${triggers?.length ?? 0} subscriptions`}
-        description="Active webhook trigger subscriptions"
-      />
+      <TopBar title="Triggers" />
       <main className="flex-1 p-6 space-y-4 max-w-4xl w-full mx-auto">
         {isLoading ? (
           <div className="space-y-2">

@@ -71,8 +71,6 @@ export default function IntegrationsPage() {
     <>
       <TopBar
         title="Integrations"
-        badge={isLoading ? undefined : `${connected.length} connected`}
-        description="Connect your tools and services"
         actions={
           <Button size="sm" className="gap-1.5 h-8 text-xs">
             <Plus className="w-3.5 h-3.5" />
