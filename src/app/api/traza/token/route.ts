@@ -2,28 +2,7 @@ import { SignJWT } from "jose"
 import { headers } from "next/headers"
 import { NextResponse } from "next/server"
 
-import { auth, pool } from "@/lib/auth"
-
-async function provisionOrg(
-  userId: string,
-  userName: string,
-  apiUrl: string,
-  bootstrapKey: string,
-): Promise<string | null> {
-  const res = await fetch(`${apiUrl}/v1/organizations/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-API-Key": bootstrapKey },
-    body: JSON.stringify({ name: `${userName}'s workspace` }),
-  })
-  if (!res.ok) return null
-
-  const data = (await res.json()) as { organization: { id: string } }
-  const orgId = data.organization.id
-
-  await pool.query(`UPDATE "user" SET "organizationId" = $1 WHERE id = $2`, [orgId, userId])
-
-  return orgId
-}
+import { auth } from "@/lib/auth"
 
 export async function GET() {
   const h = await headers()
@@ -33,19 +12,13 @@ export async function GET() {
   }
 
   const secret = process.env.TRAZA_API_JWT_SECRET
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL
-  const bootstrapKey = process.env.TRAZA_BOOTSTRAP_API_KEY
-  if (!secret || !apiUrl || !bootstrapKey) {
+  if (!secret) {
     return NextResponse.json({ error: "server_misconfigured" }, { status: 500 })
   }
 
-  let orgId = (session.user as { organizationId?: string | null }).organizationId ?? null
-
+  const orgId = (session.user as { organizationId?: string | null }).organizationId ?? null
   if (!orgId) {
-    orgId = await provisionOrg(session.user.id, session.user.name, apiUrl, bootstrapKey)
-    if (!orgId) {
-      return NextResponse.json({ error: "workspace_creation_failed" }, { status: 502 })
-    }
+    return NextResponse.json({ error: "workspace_required" }, { status: 403 })
   }
 
   const token = await new SignJWT({

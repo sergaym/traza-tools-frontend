@@ -1,12 +1,6 @@
 "use client"
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react"
+import { createContext, useCallback, useContext, useEffect, useState } from "react"
 
 import { authClient } from "@/lib/auth-client"
 import { apiClient, clearTrazaTokenCache } from "@/lib/api-client"
@@ -22,6 +16,7 @@ interface AuthState {
   user: AuthUser | null
   isAuthenticated: boolean
   isLoading: boolean
+  needsWorkspace: boolean
   login: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
   refreshUser: () => Promise<void>
@@ -29,36 +24,34 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState | undefined>(undefined)
 
+type BetterAuthUser = { organizationId?: string | null }
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { data: session, isPending: sessionPending } = authClient.useSession()
+  const { data: session, isPending } = authClient.useSession()
   const [user, setUser] = useState<AuthUser | null>(null)
   const [meLoading, setMeLoading] = useState(true)
 
+  const orgId = (session?.user as BetterAuthUser | undefined)?.organizationId ?? null
+
   useEffect(() => {
-    if (sessionPending) return
-    if (!session) {
+    if (isPending) return
+    if (!session || !orgId) {
       setUser(null)
       setMeLoading(false)
       return
     }
     setMeLoading(true)
-    clearTrazaTokenCache()
-    apiClient
-      .get<AuthUser>("/v1/auth/me")
+    apiClient.get<AuthUser>("/v1/auth/me")
       .then(setUser)
       .catch(() => setUser(null))
       .finally(() => setMeLoading(false))
-  }, [session, sessionPending])
+  }, [session, isPending, orgId])
 
   const refreshUser = useCallback(async () => {
     clearTrazaTokenCache()
-    if (!session) {
-      setUser(null)
-      return
-    }
+    if (!session) return setUser(null)
     try {
-      const me = await apiClient.get<AuthUser>("/v1/auth/me")
-      setUser(me)
+      setUser(await apiClient.get<AuthUser>("/v1/auth/me"))
     } catch {
       setUser(null)
     }
@@ -66,9 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(async (email: string, password: string) => {
     const { error } = await authClient.signIn.email({ email, password })
-    if (error) {
-      throw new Error(error.message ?? "Sign in failed")
-    }
+    if (error) throw new Error(error.message ?? "Sign in failed")
     clearTrazaTokenCache()
   }, [])
 
@@ -78,20 +69,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null)
   }, [])
 
-  const isLoading = sessionPending || (!!session && meLoading)
-  const isAuthenticated = !!session && !!user
-
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isAuthenticated,
-        isLoading,
-        login,
-        logout,
-        refreshUser,
-      }}
-    >
+    <AuthContext.Provider value={{
+      user,
+      isAuthenticated: !!session && !!user,
+      isLoading: isPending || (!!session && !!orgId && meLoading),
+      needsWorkspace: !isPending && !!session && !orgId,
+      login,
+      logout,
+      refreshUser,
+    }}>
       {children}
     </AuthContext.Provider>
   )
