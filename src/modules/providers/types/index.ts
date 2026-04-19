@@ -1,11 +1,13 @@
 export interface ProviderSummary {
   id: string
   name: string
+  icon_url?: string | null
 }
 
 export interface ProviderDetail {
   id: string
   name: string
+  icon_url?: string | null
   tool_count: number
   trigger_count: number
 }

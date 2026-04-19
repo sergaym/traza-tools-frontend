@@ -15,6 +15,7 @@ import { providersService } from "@/modules/providers/services/providers-service
 import { toolsService } from "@/modules/tools/services/tools-service"
 import { connectionsService } from "@/modules/connections/services/connections-service"
 import { triggersService } from "@/modules/triggers/services/triggers-service"
+import { ProviderIcon } from "@/modules/providers/components/provider-icon"
 import type { ToolSummary } from "@/modules/tools/types"
 import type { TriggerSubscription } from "@/modules/triggers/types"
 import type { Connection } from "@/modules/connections/types"
@@ -93,8 +94,6 @@ export default function IntegrationDetailPage({ params }: { params: Promise<{ id
     )
   }
 
-  const initials = provider.name.slice(0, 2).toUpperCase()
-
   return (
     <>
       <TopBar
@@ -111,9 +110,7 @@ export default function IntegrationDetailPage({ params }: { params: Promise<{ id
       />
       <main className="flex-1 p-6 space-y-5 max-w-4xl w-full mx-auto">
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl shrink-0 flex items-center justify-center text-sm font-bold bg-primary/10 text-primary">
-            {initials}
-          </div>
+          <ProviderIcon name={provider.name} iconUrl={provider.icon_url} className="w-10 h-10 rounded-xl text-sm" />
           <div className="flex-1 min-w-0">
             <p className="text-base font-semibold text-foreground">{provider.name}</p>
             <p className="text-xs text-muted-foreground">

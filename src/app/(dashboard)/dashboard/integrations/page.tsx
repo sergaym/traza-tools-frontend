@@ -13,6 +13,7 @@ import { Search, Plus, Globe, ChevronRight } from "lucide-react"
 import { providersService } from "@/modules/providers/services/providers-service"
 import { connectionsService } from "@/modules/connections/services/connections-service"
 import { connectLinksService } from "@/modules/connect-links/services/connect-links-service"
+import { ProviderIcon } from "@/modules/providers/components/provider-icon"
 import type { ProviderSummary } from "@/modules/providers/types"
 import type { Connection } from "@/modules/connections/types"
 import { toast } from "sonner"
@@ -171,13 +172,9 @@ function ProviderCard({
   connecting: boolean
   onConnect: () => void
 }) {
-  const initials = provider.name.slice(0, 2).toUpperCase()
-
   const cardContent = (
     <CardContent className="p-4 flex items-start gap-3">
-      <div className="w-9 h-9 rounded-lg shrink-0 flex items-center justify-center text-xs font-bold bg-primary/10 text-primary">
-        {initials}
-      </div>
+      <ProviderIcon name={provider.name} iconUrl={provider.icon_url} className="w-9 h-9 rounded-lg text-xs" />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-foreground truncate">{provider.name}</p>
         <div className="mt-3 flex items-center justify-between">
